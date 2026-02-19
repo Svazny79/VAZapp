@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VAZapp</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-blue-600 text-white p-4 shadow flex justify-between items-center">
+    <h1 class="text-2xl font-bold">🤖 VAZapp</h1>
+    <div class="space-x-3">
+      <button onclick="showChat()" class="bg-blue-500 px-3 py-1 rounded">Chat</button>
+      <button onclick="showProfile()" class="bg-blue-500 px-3 py-1 rounded">Profile</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="flex-1 flex justify-center items-center p-4">
+
+    <!-- CHAT PAGE -->
+    <div id="chatPage" class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6 flex flex-col">
+
+      <div class="flex items-center gap-3 mb-3">
+        <img id="chatAvatar" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full">
+        <span id="chatName" class="font-bold">Guest</span>
+      </div>
+
+      <!-- Chat Area -->
+      <div id="chat" class="flex-1 overflow-y-auto mb-4 space-y-3 p-2 border rounded">
+        <div class="text-gray-500 text-sm">vazAI: Hi! I'm vazAI 🤖 Ask me anything!</div>
+      </div>
+
+      <!-- Input -->
+      <div class="flex gap-2">
+        <input
+          id="userInput"
+          type="text"
+          placeholder="Type your message..."
+          class="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          onclick="sendMessage()"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Send
+        </button>
+      </div>
+
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="profilePage" class="hidden bg-white w-full max-w-xl rounded-2xl shadow-lg p-6">
+
+      <h2 class="text-2xl font-bold mb-4 text-center">👤 Your Profile</h2>
+
+      <div class="flex flex-col items-center gap-4">
+
+        <img id="profilePreview" src="https://via.placeholder.com/120" class="w-32 h-32 rounded-full border">
+
+        <input
+          type="file"
+          accept="image/*"
+          onchange="loadImage(event)"
+          class="text-sm"
+        />
+
+        <input
+          id="usernameInput"
+          type="text"
+          placeholder="Enter username"
+          class="border rounded-lg p-2 w-full"
+        />
+
+        <button
+          onclick="saveProfile()"
+          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full"
+        >
+          Save Profile
+        </button>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-gray-200 text-center p-2 text-sm">
+    © 2026 VAZapp
+  </footer>
+
+  <!-- Script -->
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("userInput");
+
+    const chatPage = document.getElementById("chatPage");
+    const profilePage = document.getElementById("profilePage");
+
+    const chatName = document.getElementById("chatName");
+    const chatAvatar = document.getElementById("chatAvatar");
+
+    const profilePreview = document.getElementById("profilePreview");
+    const usernameInput = document.getElementById("usernameInput");
+
+
+    /* Page Switching */
+    function showChat() {
+      chatPage.classList.remove("hidden");
+      profilePage.classList.add("hidden");
+    }
+
+    function showProfile() {
+      profilePage.classList.remove("hidden");
+      chatPage.classList.add("hidden");
+    }
+
+
+    /* Chat System */
+    function addMessage(text, sender) {
+      const div = document.createElement("div");
+      div.className = sender === "user"
+        ? "text-right text-blue-600"
+        : "text-left text-gray-700";
+
+      div.innerText = (sender === "user" ? "You: " : "vazAI: ") + text;
+      chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+
+      addMessage(text, "user");
+      input.value = "";
+
+      setTimeout(() => {
+        const reply = getAIResponse(text);
+        addMessage(reply, "ai");
+      }, 600);
+    }
+
+    input.addEventListener("keypress", function (e) {
+      if (e.key === "Enter") {
+        sendMessage();
+      }
+    });
+
+
+    /* vazAI Logic */
+    function getAIResponse(message) {
+      message = message.toLowerCase();
+
+      if (message.includes("hello") || message.includes("hi")) {
+        return "Hey! I'm vazAI. How can I help you today?";
+      }
+
+      if (message.includes("name") || message.includes("who are you")) {
+        return "I'm vazAI, your personal assistant inside VAZapp 🤖";
+      }
+
+      if (message.includes("code")) {
+        return "I can help you build websites and apps!";
+      }
+
+      if (message.includes("website")) {
+        return "VAZapp is your own custom AI website 😎";
+      }
+
+      return "Interesting! Tell me more.";
+    }
+
+
+    /* Profile System */
+    function loadImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function () {
+        profilePreview.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function saveProfile() {
+      const username = usernameInput.value.trim() || "Guest";
+      const avatar = profilePreview.src;
+
+      localStorage.setItem("vaz_username", username);
+      localStorage.setItem("vaz_avatar", avatar);
+
+      loadProfile();
+      showChat();
+
+      alert("Profile Saved! ✅");
+    }
+
+    function loadProfile() {
+      const savedName = localStorage.getItem("vaz_username");
+      const savedAvatar = localStorage.getItem("vaz_avatar");
+
+      if (savedName) {
+        chatName.innerText = savedName;
+        usernameInput.value = savedName;
+      }
+
+      if (savedAvatar) {
+        chatAvatar.src = savedAvatar;
+        profilePreview.src = savedAvatar;
+      }
+    }
+
+
+    // Load profile on startup
+    loadProfile();
+
+  </script>
+
+</body>
+</html>
