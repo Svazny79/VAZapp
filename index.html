@@ -23,9 +23,40 @@
       background: #1f2933 !important;
       color: white;
     }
+
+    /* Logo Animation */
+    @keyframes auraGlow {
+      0%, 100% { text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
+      50% { text-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 40px #0ff; }
+    }
+
+    .logo-animation {
+      font-size: 3rem;
+      font-weight: bold;
+      opacity: 0;
+      transform: scale(0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-animation span.highlight {
+      color: #0ff;
+      animation: auraGlow 1.5s infinite alternate;
+    }
+
+    .logo-animation span.app {
+      color: white;
+      font-weight: bolder;
+    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col" id="body">
+
+  <!-- Logo Animation Overlay -->
+  <div id="logoAnimation" class="logo-animation absolute inset-0 bg-gray-900 flex flex-col justify-center items-center z-50">
+    <span><span class="highlight">VAZ</span><span class="app">app</span></span>
+  </div>
 
   <!-- Header -->
   <header class="bg-blue-600 text-white p-4 shadow flex justify-between items-center">
@@ -42,274 +73,91 @@
 
     <!-- CHAT PAGE -->
     <div id="chatPage" class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6 flex flex-col">
-
       <div class="flex items-center gap-3 mb-3">
         <img id="chatAvatar" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full">
         <span id="chatName" class="font-bold">Guest</span>
       </div>
-
-      <!-- Chat Area -->
       <div id="chat" class="flex-1 overflow-y-auto mb-4 space-y-2 p-2 border rounded"></div>
-
-      <!-- Input -->
       <div class="flex gap-2">
-        <input
-          id="userInput"
-          type="text"
-          placeholder="Type your message..."
-          class="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onclick="sendMessage()"
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        >
-          Send
-        </button>
+        <input id="userInput" type="text" placeholder="Type your message..." class="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Send</button>
       </div>
-
     </div>
 
     <!-- PROFILE PAGE -->
     <div id="profilePage" class="hidden bg-white w-full max-w-xl rounded-2xl shadow-lg p-6">
-
       <h2 class="text-2xl font-bold mb-4 text-center">👤 Your Profile</h2>
-
       <div class="flex flex-col items-center gap-4">
-
         <img id="profilePreview" src="https://via.placeholder.com/120" class="w-32 h-32 rounded-full border">
-
-        <input
-          type="file"
-          accept="image/*"
-          onchange="loadImage(event)"
-          class="text-sm"
-        />
-
-        <input
-          id="usernameInput"
-          type="text"
-          placeholder="Enter username"
-          class="border rounded-lg p-2 w-full"
-        />
-
-        <button
-          onclick="saveProfile()"
-          class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full"
-        >
-          Save Profile
-        </button>
-
+        <input type="file" accept="image/*" onchange="loadImage(event)" class="text-sm" />
+        <input id="usernameInput" type="text" placeholder="Enter username" class="border rounded-lg p-2 w-full" />
+        <button onclick="saveProfile()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full">Save Profile</button>
       </div>
-
     </div>
 
   </main>
 
   <!-- Footer -->
-  <footer class="bg-gray-200 text-center p-2 text-sm">
-    © 2026 VAZapp
-  </footer>
+  <footer class="bg-gray-200 text-center p-2 text-sm">© 2026 VAZapp</footer>
 
-  <!-- Script -->
   <script>
-
-    /* Elements */
-    const chat = document.getElementById("chat");
-    const input = document.getElementById("userInput");
-    const body = document.getElementById("body");
-
-    const chatPage = document.getElementById("chatPage");
-    const profilePage = document.getElementById("profilePage");
-
-    const chatName = document.getElementById("chatName");
-    const chatAvatar = document.getElementById("chatAvatar");
-
-    const profilePreview = document.getElementById("profilePreview");
-    const usernameInput = document.getElementById("usernameInput");
-
-
-    /* Page Switching */
-    function showChat() {
-      chatPage.classList.remove("hidden");
-      profilePage.classList.add("hidden");
-    }
-
-    function showProfile() {
-      profilePage.classList.remove("hidden");
-      chatPage.classList.add("hidden");
-    }
-
-
-    /* Dark Mode */
-    function toggleDarkMode() {
-      body.classList.toggle("dark");
-
-      const isDark = body.classList.contains("dark");
-      localStorage.setItem("vaz_dark", isDark);
-    }
-
-
-    /* Chat System */
-    function addMessage(text, sender) {
-      const div = document.createElement("div");
-
-      div.className = sender === "user"
-        ? "text-right text-blue-400"
-        : "text-left text-green-400";
-
-      div.innerText = (sender === "user" ? "You: " : "vazAI: ") + text;
-
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
-
-      saveChat();
-    }
-
-
-    function sendMessage() {
-      const text = input.value.trim();
-      if (!text) return;
-
-      addMessage(text, "user");
-      input.value = "";
-
+    // Logo animation hide
+    window.addEventListener('load', () => {
+      const logo = document.getElementById('logoAnimation');
       setTimeout(() => {
-        const reply = getAIResponse(text);
-        addMessage(reply, "ai");
-      }, 600);
-    }
-
-
-    input.addEventListener("keypress", function (e) {
-      if (e.key === "Enter") sendMessage();
+        logo.style.transition = 'opacity 1s, transform 1s';
+        logo.style.opacity = '0';
+        logo.style.transform = 'scale(1.5)';
+        setTimeout(() => logo.remove(), 1000);
+      }, 1500);
     });
 
+    // Elements
+    const chat = document.getElementById("chat"), input = document.getElementById("userInput"), body = document.getElementById("body");
+    const chatPage = document.getElementById("chatPage"), profilePage = document.getElementById("profilePage");
+    const chatName = document.getElementById("chatName"), chatAvatar = document.getElementById("chatAvatar");
+    const profilePreview = document.getElementById("profilePreview"), usernameInput = document.getElementById("usernameInput");
 
-    /* Smart vazAI (Offline) */
-    function getAIResponse(message) {
-      message = message.toLowerCase();
+    // Page & Dark Mode
+    function showChat(){chatPage.classList.remove("hidden"); profilePage.classList.add("hidden");}
+    function showProfile(){profilePage.classList.remove("hidden"); chatPage.classList.add("hidden");}
+    function toggleDarkMode(){body.classList.toggle("dark"); localStorage.setItem("vaz_dark", body.classList.contains("dark"));}
 
-      if (message.includes("hi") || message.includes("hello"))
-        return "Hey! I'm vazAI 😎";
+    // Profile functions
+    function loadImage(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(f);}
+    function saveProfile(){const u=usernameInput.value||"Guest",a=profilePreview.src;localStorage.setItem("vaz_username",u);localStorage.setItem("vaz_avatar",a);loadProfile();showChat();alert("Profile Saved! ✅");}
+    function loadProfile(){const n=localStorage.getItem("vaz_username"),a=localStorage.getItem("vaz_avatar");if(n){chatName.innerText=n;usernameInput.value=n;}if(a){chatAvatar.src=a;profilePreview.src=a;}}
 
-      if (message.includes("how are you"))
-        return "I'm great! Ready to help you.";
+    // Chat memory
+    function saveChat(){localStorage.setItem("vaz_chat",chat.innerHTML);}
+    function loadChat(){const s=localStorage.getItem("vaz_chat");if(s)chat.innerHTML=s;else addMessage("Hi! I'm vazAI 🤖","ai");}
 
-      if (message.includes("code"))
-        return "What are you building? I can help.";
+    // Add message
+    function addMessage(text,sender){const div=document.createElement("div");div.className=sender==="user"?"text-right text-blue-400":"text-left text-green-400";div.innerText=(sender==="user"?"You: ":"vazAI: ")+text;chat.appendChild(div);chat.scrollTop=chat.scrollHeight;saveChat();}
+    input.addEventListener("keypress",e=>{if(e.key==='Enter')sendMessage();});
+    function sendMessage(){const t=input.value.trim();if(!t)return;addMessage(t,"user");input.value="";setTimeout(()=>addMessage(getAIResponse(t),"ai"),600);}
 
-      if (message.includes("school"))
-        return "What subject are you working on?";
-
-      if (message.includes("website"))
-        return "VAZapp is getting better every day 🚀";
-
-      if (message.includes("thank"))
-        return "No problem! 😊";
-
-
-      const smart = [
-        "Tell me more about that.",
-        "Why do you think that?",
-        "That's interesting 🤔",
-        "What do you want to do next?",
-        "Can you explain that better?"
-      ];
-
-      return smart[Math.floor(Math.random() * smart.length)];
+    // Smarter vazAI logic
+    function getAIResponse(msg){
+      msg=msg.toLowerCase();
+      const responses=[];
+      if(msg.includes("hello")||msg.includes("hi"))return"Hey! I'm vazAI 😎 How's it going?";
+      if(msg.includes("how are you"))return"I'm great! Ready to assist you 😄";
+      if(msg.includes("name")||msg.includes("who are you"))return"I'm vazAI, your intelligent assistant inside VAZapp 🤖";
+      if(msg.includes("help"))return"Sure! What do you need help with?";
+      if(msg.includes("code"))return"I can guide you in coding websites, apps, or scripts!";
+      if(msg.includes("website"))return"VAZapp is evolving! Want me to suggest improvements?";
+      if(msg.includes("school")||msg.includes("homework"))return"Let's tackle your school work together. What subject?";
+      if(msg.includes("math"))return"Send me the math problem and I'll solve it with steps.";
+      if(msg.includes("bored"))return"We can chat, learn something cool, or brainstorm ideas together 😎";
+      if(msg.includes("thank"))return"You're welcome! 😊";
+      // AI smart responses
+      const smart=["Interesting! Tell me more.","Why do you think that?","Can you explain that in detail?","That sounds exciting!","What would you like to do next?","I see, go on..."];return smart[Math.floor(Math.random()*smart.length)];
     }
 
-
-    /* REAL AI (Optional Upgrade)
-       You can connect OpenAI API here later */
-
-    /*
-    async function getRealAI(message) {
-      const res = await fetch("YOUR_API_URL", {
-        method: "POST",
-        headers: {
-          "Authorization": "Bearer YOUR_KEY",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ prompt: message })
-      });
-
-      const data = await res.json();
-      return data.reply;
-    }
-    */
-
-
-    /* Profile */
-    function loadImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = () => profilePreview.src = reader.result;
-      reader.readAsDataURL(file);
-    }
-
-
-    function saveProfile() {
-      const username = usernameInput.value || "Guest";
-      const avatar = profilePreview.src;
-
-      localStorage.setItem("vaz_username", username);
-      localStorage.setItem("vaz_avatar", avatar);
-
-      loadProfile();
-      showChat();
-
-      alert("Profile Saved! ✅");
-    }
-
-
-    function loadProfile() {
-      const name = localStorage.getItem("vaz_username");
-      const avatar = localStorage.getItem("vaz_avatar");
-
-      if (name) {
-        chatName.innerText = name;
-        usernameInput.value = name;
-      }
-
-      if (avatar) {
-        chatAvatar.src = avatar;
-        profilePreview.src = avatar;
-      }
-    }
-
-
-    /* Chat Memory */
-    function saveChat() {
-      localStorage.setItem("vaz_chat", chat.innerHTML);
-    }
-
-
-    function loadChat() {
-      const saved = localStorage.getItem("vaz_chat");
-
-      if (saved) chat.innerHTML = saved;
-      else addMessage("Hi! I'm vazAI 🤖", "ai");
-    }
-
-
-    /* Load Settings */
-    function loadSettings() {
-
-      if (localStorage.getItem("vaz_dark") === "true") {
-        body.classList.add("dark");
-      }
-
-      loadProfile();
-      loadChat();
-    }
-
-
+    // Load settings
+    function loadSettings(){if(localStorage.getItem("vaz_dark")==="true")body.classList.add("dark");loadProfile();loadChat();}
     loadSettings();
-
   </script>
-
 </body>
 </html>
