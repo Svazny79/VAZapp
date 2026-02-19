@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VAZapp</title>
 
-  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -14,47 +13,30 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    .dark {
-      background: #111827;
-      color: white;
-    }
-
-    .dark .bg-white {
-      background: #1f2933 !important;
-      color: white;
-    }
+    .dark { background: #111827; color: white; }
+    .dark .bg-white { background: #1f2933 !important; color: white; }
 
     /* Logo Animation */
     @keyframes auraGlow {
-      0%, 100% { text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff; }
-      50% { text-shadow: 0 0 15px #0ff, 0 0 30px #0ff, 0 0 40px #0ff; }
+      0%,100% { text-shadow:0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff; }
+      50% { text-shadow:0 0 15px #0ff,0 0 30px #0ff,0 0 40px #0ff; }
     }
-
     .logo-animation {
-      font-size: 3rem;
-      font-weight: bold;
-      opacity: 0;
-      transform: scale(0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      position: fixed; top:0; left:0; width:100%; height:100%;
+      display:flex; justify-content:center; align-items:center;
+      background:#000; z-index:9999; opacity:1; transform:scale(0.5);
+      transition:opacity 1s, transform 1s;
+      font-size:3rem; font-weight:bold;
     }
+    .logo-animation span.highlight { color:#0ff; animation:auraGlow 1.5s infinite alternate; }
+    .logo-animation span.app { color:#fff; font-weight:bolder; }
 
-    .logo-animation span.highlight {
-      color: #0ff;
-      animation: auraGlow 1.5s infinite alternate;
-    }
-
-    .logo-animation span.app {
-      color: white;
-      font-weight: bolder;
-    }
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col" id="body">
 
   <!-- Logo Animation Overlay -->
-  <div id="logoAnimation" class="logo-animation absolute inset-0 bg-gray-900 flex flex-col justify-center items-center z-50">
+  <div id="logoAnimation" class="logo-animation">
     <span><span class="highlight">VAZ</span><span class="app">app</span></span>
   </div>
 
@@ -68,7 +50,6 @@
     </div>
   </header>
 
-  <!-- Main -->
   <main class="flex-1 flex justify-center items-center p-4">
 
     <!-- CHAT PAGE -->
@@ -97,33 +78,31 @@
 
   </main>
 
-  <!-- Footer -->
   <footer class="bg-gray-200 text-center p-2 text-sm">© 2026 VAZapp</footer>
 
   <script>
-    // Logo animation hide
-    window.addEventListener('load', () => {
-      const logo = document.getElementById('logoAnimation');
-      setTimeout(() => {
-        logo.style.transition = 'opacity 1s, transform 1s';
-        logo.style.opacity = '0';
-        logo.style.transform = 'scale(1.5)';
-        setTimeout(() => logo.remove(), 1000);
-      }, 1500);
+    // Logo animation
+    window.addEventListener('load',()=>{
+      const logo=document.getElementById('logoAnimation');
+      setTimeout(()=>{
+        logo.style.opacity='0';
+        logo.style.transform='scale(1.5)';
+        setTimeout(()=>logo.remove(),1000);
+      },1500);
     });
 
     // Elements
-    const chat = document.getElementById("chat"), input = document.getElementById("userInput"), body = document.getElementById("body");
-    const chatPage = document.getElementById("chatPage"), profilePage = document.getElementById("profilePage");
-    const chatName = document.getElementById("chatName"), chatAvatar = document.getElementById("chatAvatar");
-    const profilePreview = document.getElementById("profilePreview"), usernameInput = document.getElementById("usernameInput");
+    const chat=document.getElementById("chat"), input=document.getElementById("userInput"), body=document.getElementById("body");
+    const chatPage=document.getElementById("chatPage"), profilePage=document.getElementById("profilePage");
+    const chatName=document.getElementById("chatName"), chatAvatar=document.getElementById("chatAvatar");
+    const profilePreview=document.getElementById("profilePreview"), usernameInput=document.getElementById("usernameInput");
 
     // Page & Dark Mode
     function showChat(){chatPage.classList.remove("hidden"); profilePage.classList.add("hidden");}
     function showProfile(){profilePage.classList.remove("hidden"); chatPage.classList.add("hidden");}
-    function toggleDarkMode(){body.classList.toggle("dark"); localStorage.setItem("vaz_dark", body.classList.contains("dark"));}
+    function toggleDarkMode(){body.classList.toggle("dark"); localStorage.setItem("vaz_dark",body.classList.contains("dark"));}
 
-    // Profile functions
+    // Profile
     function loadImage(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(f);}
     function saveProfile(){const u=usernameInput.value||"Guest",a=profilePreview.src;localStorage.setItem("vaz_username",u);localStorage.setItem("vaz_avatar",a);loadProfile();showChat();alert("Profile Saved! ✅");}
     function loadProfile(){const n=localStorage.getItem("vaz_username"),a=localStorage.getItem("vaz_avatar");if(n){chatName.innerText=n;usernameInput.value=n;}if(a){chatAvatar.src=a;profilePreview.src=a;}}
@@ -137,10 +116,9 @@
     input.addEventListener("keypress",e=>{if(e.key==='Enter')sendMessage();});
     function sendMessage(){const t=input.value.trim();if(!t)return;addMessage(t,"user");input.value="";setTimeout(()=>addMessage(getAIResponse(t),"ai"),600);}
 
-    // Smarter vazAI logic
+    // Smarter AI
     function getAIResponse(msg){
       msg=msg.toLowerCase();
-      const responses=[];
       if(msg.includes("hello")||msg.includes("hi"))return"Hey! I'm vazAI 😎 How's it going?";
       if(msg.includes("how are you"))return"I'm great! Ready to assist you 😄";
       if(msg.includes("name")||msg.includes("who are you"))return"I'm vazAI, your intelligent assistant inside VAZapp 🤖";
@@ -151,7 +129,6 @@
       if(msg.includes("math"))return"Send me the math problem and I'll solve it with steps.";
       if(msg.includes("bored"))return"We can chat, learn something cool, or brainstorm ideas together 😎";
       if(msg.includes("thank"))return"You're welcome! 😊";
-      // AI smart responses
       const smart=["Interesting! Tell me more.","Why do you think that?","Can you explain that in detail?","That sounds exciting!","What would you like to do next?","I see, go on..."];return smart[Math.floor(Math.random()*smart.length)];
     }
 
