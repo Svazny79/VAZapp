@@ -30,7 +30,6 @@
     }
     .logo-animation span.highlight { color:#0ff; animation:auraGlow 1.5s infinite alternate; }
     .logo-animation span.app { color:#fff; font-weight:bolder; }
-
   </style>
 </head>
 <body class="bg-gray-100 min-h-screen flex flex-col" id="body">
@@ -107,29 +106,37 @@
     function saveProfile(){const u=usernameInput.value||"Guest",a=profilePreview.src;localStorage.setItem("vaz_username",u);localStorage.setItem("vaz_avatar",a);loadProfile();showChat();alert("Profile Saved! ✅");}
     function loadProfile(){const n=localStorage.getItem("vaz_username"),a=localStorage.getItem("vaz_avatar");if(n){chatName.innerText=n;usernameInput.value=n;}if(a){chatAvatar.src=a;profilePreview.src=a;}}
 
-    // Chat memory
-    function saveChat(){localStorage.setItem("vaz_chat",chat.innerHTML);}
-    function loadChat(){const s=localStorage.getItem("vaz_chat");if(s)chat.innerHTML=s;else addMessage("Hi! I'm vazAI 🤖","ai");}
+    // Chat memory cleared on reload
+    function saveChat(){/* do nothing to clear chat on reload */}
+    function loadChat(){chat.innerHTML=""; addMessage("Hi! I'm vazAI 🤖","ai");}
 
     // Add message
-    function addMessage(text,sender){const div=document.createElement("div");div.className=sender==="user"?"text-right text-blue-400":"text-left text-green-400";div.innerText=(sender==="user"?"You: ":"vazAI: ")+text;chat.appendChild(div);chat.scrollTop=chat.scrollHeight;saveChat();}
+    function addMessage(text,sender){const div=document.createElement("div");div.className=sender==="user"?"text-right text-blue-400":"text-left text-green-400";div.innerText=(sender==="user"?"You: ":"vazAI: ")+text;chat.appendChild(div);chat.scrollTop=chat.scrollHeight;}
     input.addEventListener("keypress",e=>{if(e.key==='Enter')sendMessage();});
     function sendMessage(){const t=input.value.trim();if(!t)return;addMessage(t,"user");input.value="";setTimeout(()=>addMessage(getAIResponse(t),"ai"),600);}
 
-    // Smarter AI
+    // Smarter AI responses
     function getAIResponse(msg){
       msg=msg.toLowerCase();
-      if(msg.includes("hello")||msg.includes("hi"))return"Hey! I'm vazAI 😎 How's it going?";
-      if(msg.includes("how are you"))return"I'm great! Ready to assist you 😄";
-      if(msg.includes("name")||msg.includes("who are you"))return"I'm vazAI, your intelligent assistant inside VAZapp 🤖";
-      if(msg.includes("help"))return"Sure! What do you need help with?";
-      if(msg.includes("code"))return"I can guide you in coding websites, apps, or scripts!";
-      if(msg.includes("website"))return"VAZapp is evolving! Want me to suggest improvements?";
-      if(msg.includes("school")||msg.includes("homework"))return"Let's tackle your school work together. What subject?";
-      if(msg.includes("math"))return"Send me the math problem and I'll solve it with steps.";
+      if(msg.includes("hello")||msg.includes("hi"))return"Hey! I'm vazAI 😎 How are you today?";
+      if(msg.includes("how are you"))return"I'm fantastic! Ready to chat and help you 😄";
+      if(msg.includes("name")||msg.includes("who are you"))return"I'm vazAI, your smart assistant inside VAZapp 🤖";
+      if(msg.includes("help"))return"Sure! What can I help you with today?";
+      if(msg.includes("code"))return"I can guide you through coding, building websites, or apps.";
+      if(msg.includes("website"))return"VAZapp is evolving! Need suggestions or new features?";
+      if(msg.includes("school")||msg.includes("homework"))return"Let's tackle your school work together! What subject?";
+      if(msg.includes("math"))return"Send me the math problem and I'll solve it step by step.";
       if(msg.includes("bored"))return"We can chat, learn something cool, or brainstorm ideas together 😎";
       if(msg.includes("thank"))return"You're welcome! 😊";
-      const smart=["Interesting! Tell me more.","Why do you think that?","Can you explain that in detail?","That sounds exciting!","What would you like to do next?","I see, go on..."];return smart[Math.floor(Math.random()*smart.length)];
+      // Dynamic smart fallback responses
+      const smart=[
+        "That sounds interesting! Can you explain more?",
+        "Why do you think that?",
+        "I see! Tell me more details.",
+        "What would you like to do next?",
+        "Hmm, fascinating!"
+      ];
+      return smart[Math.floor(Math.random()*smart.length)];
     }
 
     // Load settings
