@@ -70,7 +70,16 @@ body{font-family:Arial,sans-serif;transition:.3s}
 
 <script>
 // Splash
-window.onload=()=>{setTimeout(()=>{logoAnimation.style.opacity=0;setTimeout(()=>logoAnimation.remove(),1000)},1500)}
+window.onload=()=>{
+  const logo=document.getElementById("logoAnimation");
+  setTimeout(()=>{
+    logo.style.opacity="0";
+    logo.style.pointerEvents="none";
+    setTimeout(()=>{
+      logo.style.display="none";
+    },1000);
+  },1800);
+}
 
 // Pages
 const chatPage=document.getElementById("chatPage");
