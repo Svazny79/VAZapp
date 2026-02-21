@@ -5,16 +5,39 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAZapp</title>
 <script src="https://cdn.tailwindcss.com"></script>
+
+<!-- PWA Manifest (Inline) -->
+<link rel="manifest" id="manifestPlaceholder">
+<meta name="theme-color" content="#2563eb">
+
 <style>
 body{font-family:Arial,sans-serif;transition:.3s}
 .dark{background:#111827;color:#fff}
 .dark .bg-white{background:#1f2933!important;color:#fff}
-@keyframes auraGlow{0%,100%{text-shadow:0 0 5px #0ff,0 0 15px #0ff}50%{text-shadow:0 0 25px #0ff,0 0 40px #0ff}}
-.logo-animation{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:#000;z-index:9999;font-size:3rem;font-weight:bold;transition:1s}
+
+@keyframes auraGlow{
+0%,100%{text-shadow:0 0 5px #0ff,0 0 15px #0ff}
+50%{text-shadow:0 0 25px #0ff,0 0 40px #0ff}
+}
+
+.logo-animation{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
+z-index:9999;
+font-size:3rem;
+font-weight:bold;
+transition:opacity 1s ease;
+}
+
 .logo-animation .highlight{color:#0ff;animation:auraGlow 1.5s infinite}
 .logo-animation .app{color:#fff;font-weight:900}
 </style>
 </head>
+
 <body id="body" class="bg-gray-100 min-h-screen flex flex-col">
 
 <!-- Splash -->
@@ -69,70 +92,144 @@ body{font-family:Arial,sans-serif;transition:.3s}
 <footer class="bg-gray-200 p-2 text-center text-sm">©2026 VAZapp</footer>
 
 <script>
-// Splash
-window.onload=()=>{
+
+/* ================= SPLASH ================= */
+window.addEventListener("load",()=>{
   const logo=document.getElementById("logoAnimation");
   setTimeout(()=>{
     logo.style.opacity="0";
-    logo.style.pointerEvents="none";
     setTimeout(()=>{
-      logo.style.display="none";
-    },1000);
-  },1800);
+      logo.remove();
+    },1200);
+  },1500);
+});
+
+/* ================= PWA SETUP ================= */
+
+const manifest={
+  name:"VAZapp",
+  short_name:"VAZapp",
+  start_url:".",
+  display:"standalone",
+  background_color:"#000000",
+  theme_color:"#2563eb",
+  description:"VAZapp with vazAI and Stories",
+  icons:[
+    {src:"https://via.placeholder.com/192",sizes:"192x192",type:"image/png"},
+    {src:"https://via.placeholder.com/512",sizes:"512x512",type:"image/png"}
+  ]
+};
+
+const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+document.getElementById("manifestPlaceholder").href=URL.createObjectURL(blob);
+
+// Service Worker (inline)
+if("serviceWorker" in navigator){
+  const swCode=`
+  self.addEventListener('install',e=>{
+    e.waitUntil(
+      caches.open('vazapp').then(c=>c.addAll(['./']))
+    );
+  });
+  self.addEventListener('fetch',e=>{
+    e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+  });`;
+
+  const swBlob=new Blob([swCode],{type:"text/javascript"});
+  const swURL=URL.createObjectURL(swBlob);
+
+  navigator.serviceWorker.register(swURL);
 }
 
-// Pages
+/* ================= NAV ================= */
+
 const chatPage=document.getElementById("chatPage");
 const storiesPage=document.getElementById("storiesPage");
 const profilePage=document.getElementById("profilePage");
 
-function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.add("hidden");profilePage.classList.add("hidden")}
-function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories()}
-function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden")}
+function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.add("hidden");profilePage.classList.add("hidden");}
+function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories();}
+function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden");}
 
-// Dark
-function toggleDark(){body.classList.toggle("dark");localStorage.vaz_dark=body.classList.contains("dark")}
+/* ================= DARK ================= */
 
-// Profile
-function loadImage(e){const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(e.target.files[0])}
-function saveProfile(){localStorage.vaz_user=usernameInput.value||"Guest";localStorage.vaz_avatar=profilePreview.src;loadProfile();showChat()}
-function loadProfile(){chatName.textContent=localStorage.vaz_user||"Guest";usernameInput.value=localStorage.vaz_user||"";if(localStorage.vaz_avatar){chatAvatar.src=localStorage.vaz_avatar;profilePreview.src=localStorage.vaz_avatar}}
+function toggleDark(){
+  body.classList.toggle("dark");
+  localStorage.vaz_dark=body.classList.contains("dark");
+}
 
-// Chat
-function addMsg(t,s){const d=document.createElement("div");d.className=s==="u"?"text-right text-blue-500":"text-left text-green-500";d.textContent=(s==="u"?"You: ":"vazAI: ")+t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
-function sendMessage(){const t=userInput.value.trim();if(!t)return;addMsg(t,"u");userInput.value="";setTimeout(()=>addMsg(ai(t),"a"),600)}
-userInput.onkeydown=e=>{if(e.key==="Enter")sendMessage()}
+/* ================= PROFILE ================= */
 
-function ai(m){m=m.toLowerCase();
-if(/\d+[+\-*/]\d+/.test(m))return"Answer: "+eval(m);
-if(m.startsWith("how"))return"Let’s solve this step by step. What part is confusing?";
-if(m.startsWith("what")||m.startsWith("who"))return"Good question! Tell me more.";
-if(m.includes("code"))return"Tell me what you’re building.";
-if(m.includes("sad")||m.includes("stress"))return"I’m here for you. Want to talk?";
-return"Tell me more so I can help better."}
+function loadImage(e){
+  const r=new FileReader();
+  r.onload=()=>profilePreview.src=r.result;
+  r.readAsDataURL(e.target.files[0]);
+}
 
-// Stories
+function saveProfile(){
+  localStorage.vaz_user=usernameInput.value||"Guest";
+  localStorage.vaz_avatar=profilePreview.src;
+  loadProfile();
+  showChat();
+}
+
+function loadProfile(){
+  chatName.textContent=localStorage.vaz_user||"Guest";
+  usernameInput.value=localStorage.vaz_user||"";
+  if(localStorage.vaz_avatar){
+    chatAvatar.src=localStorage.vaz_avatar;
+    profilePreview.src=localStorage.vaz_avatar;
+  }
+}
+
+/* ================= CHAT ================= */
+
+function addMsg(t,s){
+  const d=document.createElement("div");
+  d.className=s==="u"?"text-right text-blue-500":"text-left text-green-500";
+  d.textContent=(s==="u"?"You: ":"vazAI: ")+t;
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function sendMessage(){
+  const t=userInput.value.trim();
+  if(!t)return;
+  addMsg(t,"u");
+  userInput.value="";
+  setTimeout(()=>addMsg(ai(t),"a"),600);
+}
+
+userInput.onkeydown=e=>{if(e.key==="Enter")sendMessage()};
+
+function ai(m){
+  m=m.toLowerCase();
+
+  if(/\d+[+\-*/]\d+/.test(m))return "Answer: "+eval(m);
+  if(m.includes("weather"))return "Check your local forecast online.";
+  if(m.includes("code"))return "Tell me what you're building.";
+  if(m.includes("sad")||m.includes("stress"))return "I'm here for you 💙";
+  if(m.startsWith("how"))return "Let's break it down step by step.";
+  if(m.startsWith("what")||m.startsWith("who"))return "Good question!";
+
+  return "Tell me more so I can help.";
+}
+
+/* ================= STORIES ================= */
+
 let stories=JSON.parse(localStorage.vaz_stories||"[]");
 let likes=JSON.parse(localStorage.vaz_likes||"{}");
 let comments=JSON.parse(localStorage.vaz_comments||"{}");
 let follows=JSON.parse(localStorage.vaz_follows||"[]");
 
-// Fake News/Sports Users (24h rotation with media)
 const fakeUsers=[
   {user:"NHL",posts:[
-    {text:"Maple Leafs dominate in 5-2 win over rivals 🏒",src:"https://source.unsplash.com/featured/?nhl,hockey",type:"image"},
-    {text:"Playoff intensity in last night’s showdown",src:"https://source.unsplash.com/featured/?ice,hockey,arena",type:"image"},
-    {text:"Overtime thriller stuns fans",src:"https://source.unsplash.com/featured/?hockey,stadium,game",type:"image"}
+    {text:"Overtime thriller 🏒",src:"https://source.unsplash.com/featured/?nhl,hockey",type:"image"},
+    {text:"Packed arena tonight",src:"https://source.unsplash.com/featured/?hockey,arena",type:"image"}
   ]},
   {user:"NBC-News",posts:[
-    {text:"Major storm impacts East Coast",src:"https://source.unsplash.com/featured/?storm,hurricane,news",type:"image"},
-    {text:"World leaders meet for summit",src:"https://source.unsplash.com/featured/?politics,conference,meeting",type:"image"},
-    {text:"City hit by flooding overnight",src:"https://source.unsplash.com/featured/?flood,city,weather",type:"image"}
-  ]},
-  {user:"WorldUpdate",posts:[
-    {text:"Volcano activity monitored",src:"https://source.unsplash.com/featured/?volcano,nature,eruption",type:"image"},
-    {text:"Medical breakthrough announced",src:"https://source.unsplash.com/featured/?medical,lab,science",type:"image"},
-    {text:"Historic peace talks continue",src:"https://source.unsplash.com/featured/?diplomacy,meeting,flags",type:"image"}
+    {text:"Storm hits coast",src:"https://source.unsplash.com/featured/?storm,news",type:"image"},
+    {text:"World summit",src:"https://source.unsplash.com/featured/?politics,meeting",type:"image"}
   ]}
 ];
 
@@ -140,18 +237,19 @@ function generateFakeStories(){
   const last=localStorage.vaz_fake_time||0;
   const now=Date.now();
 
-  if(now-last>86400000){ // 24 hours
+  if(now-last>86400000){
     fakeUsers.forEach(f=>{
-      const post=f.posts[Math.floor(Math.random()*f.posts.length)];
+      const p=f.posts[Math.floor(Math.random()*f.posts.length)];
       stories.unshift({
         id:Date.now()+Math.random(),
         user:f.user,
-        src:post.src,
-        mediaType:post.type,
-        text:post.text,
+        src:p.src,
+        mediaType:p.type,
+        text:p.text,
         fake:true
       });
     });
+
     localStorage.vaz_fake_time=now;
     saveStories();
   }
@@ -159,66 +257,101 @@ function generateFakeStories(){
 
 generateFakeStories();
 
+function uploadStory(e){
+  const f=e.target.files[0];
+  if(!f)return;
+
+  const caption=prompt("Caption:")||"My story";
+  const type=f.type.startsWith("image")?"image":"video";
+
+  const r=new FileReader();
+  r.onload=()=>{
+    stories.unshift({
+      id:Date.now(),
+      user:localStorage.vaz_user||"Guest",
+      src:r.result,
+      mediaType:type,
+      text:caption,
+      fake:false
+    });
+    saveStories();
+    renderStories();
+  };
+
+  r.readAsDataURL(f);
+}
+
+function saveStories(){
+  localStorage.vaz_stories=JSON.stringify(stories);
+  localStorage.vaz_likes=JSON.stringify(likes);
+  localStorage.vaz_comments=JSON.stringify(comments);
+  localStorage.vaz_follows=JSON.stringify(follows);
+}
+
+function toggleFollow(u){
+  follows.includes(u)?follows=follows.filter(x=>x!==u):follows.push(u);
+  saveStories();
+  renderStories();
+}
+
+function likeStory(id){
+  likes[id]=(likes[id]||0)+1;
+  saveStories();
+  renderStories();
+}
+
+function addComment(id){
+  const t=prompt("Comment:");
+  if(!t)return;
+  comments[id]=comments[id]||[];
+  comments[id].push(t);
+  saveStories();
+  renderStories();
+}
+
 function renderStories(){
   storiesFeed.innerHTML="";
+
   stories.forEach(s=>{
     if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"Guest"))return;
 
     const d=document.createElement("div");
     d.className="border p-3 rounded";
-    const followed=follows.includes(s.user);
 
+    const followed=follows.includes(s.user);
     let content="";
 
     if(s.mediaType==="image"){
-      content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;
-    }else if(s.mediaType==="video"){
-      content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
+      content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='text-sm'>${s.text}</p>`;
     }else{
-      content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;
+      content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='text-sm'>${s.text}</p>`;
     }
 
-    d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
+    d.innerHTML=`
+    <div class='flex justify-between mb-1'>
+      <b>${s.user}</b>
+      <button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button>
+    </div>
     ${content}
-    <div class='flex gap-3 text-sm'>
-    <button onclick=\"likeStory(${s.id})\">❤️ ${likes[s.id]||0}</button>
-    <button onclick=\"addComment(${s.id})\">💬 ${comments[s.id]?comments[s.id].length:0}</button>
+    <div class='flex gap-3 text-sm mt-1'>
+      <button onclick=\"likeStory(${s.id})\">❤️ ${likes[s.id]||0}</button>
+      <button onclick=\"addComment(${s.id})\">💬 ${comments[s.id]?comments[s.id].length:0}</button>
     </div>`;
 
     storiesFeed.appendChild(d);
   });
 }
-storiesFeed.innerHTML="";stories.forEach(s=>{
-if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"Guest"))return;
-const d=document.createElement("div");
-d.className="border p-3 rounded";
-const followed=follows.includes(s.user);
 
-let content="";
-if(s.fake){
-  content = `<p class='mb-2 italic'>📰 ${s.text}</p>`;
-}else{
-  if(s.mediaType === "image"){
-    content = `<img src='${s.src}' class='w-full rounded mb-1' /><p class='mt-1 text-sm'>${s.text||""}</p>`;
-  }else{
-    content = `<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
-  }
-}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
+/* ================= INIT ================= */
+
+function init(){
+  if(localStorage.vaz_dark==="true")body.classList.add("dark");
+  loadProfile();
+  addMsg("Hi! I'm vazAI 🤖","a");
 }
 
-d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
-${content}
-<div class='flex gap-3 text-sm'>
-<button onclick=\"likeStory(${s.id})\">❤️ ${likes[s.id]||0}</button>
-<button onclick=\"addComment(${s.id})\">💬 ${comments[s.id]?comments[s.id].length:0}</button>
-</div>`;
-
-storiesFeed.appendChild(d)})}
-
-// Load
-function init(){if(localStorage.vaz_dark==="true")body.classList.add("dark");loadProfile();addMsg("Hi! I'm vazAI 🤖","a")}
 init();
+
 </script>
 </body>
 </html>
-
