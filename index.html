@@ -53,7 +53,7 @@ body{font-family:Arial,sans-serif;transition:.3s}
 <!-- Stories -->
 <div id="storiesPage" class="hidden bg-white w-full max-w-2xl p-4 rounded shadow">
 <h2 class="text-xl font-bold mb-2">📸 Stories</h2>
-<input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="mb-3">
+<input type="file" accept="image/*,video/*,image/gif" onchange="uploadStory(event)" class="mb-3">
 <div id="storiesFeed" class="space-y-4"></div>
 </div>
 
@@ -111,14 +111,14 @@ let stories=[],likes={},comments={},follows=[];
 
 const fakeUsers=[
 {user:"NHL",posts:[
-{text:"Connor McDavid scores 2 goals vs Flames 🔥",src:"https://www.youtube.com/embed/6K6dN_2xUvI",type:"youtube"},
-{text:"Maple Leafs overtime winner vs Boston Bruins 🏒",src:"https://www.youtube.com/embed/1z2gIljlfkk",type:"youtube"},
-{text:"Rangers celebrate playoff spot at MSG",src:"https://images.pexels.com/photos/1427971/pexels-photo-1427971.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=900",type:"image"}
+{text:"Connor McDavid scores 2 goals vs Flames 🔥",src:"https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif",type:"gif"},
+{text:"Maple Leafs win overtime vs Bruins 🏒",src:"https://media.giphy.com/media/26gslLxpZlYRXiZqI/giphy.gif",type:"gif"},
+{text:"Rangers celebrate playoff spot at MSG",src:"https://images.pexels.com/photos/1427971/pexels-photo-1427971.jpeg",type:"image"}
 ]},
 {user:"NBC-News",posts:[
-{text:"Flash flooding after heavy rains in Miami 🌧️",src:"https://www.youtube.com/embed/XmZ9Y8W9lJ8",type:"youtube"},
-{text:"Climate summit in Geneva with world leaders",src:"https://www.youtube.com/embed/6sn5ZXdj5Cw",type:"youtube"},
-{text:"Stock markets react to new tech regulations globally",src:"https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=400&w=900",type:"image"}
+{text:"Flash flooding after heavy rains in Miami 🌧️",src:"https://media.giphy.com/media/xT0xeJpnrWC4XWblEk/giphy.gif",type:"gif"},
+{text:"Climate summit in Geneva with world leaders",src:"https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg",type:"image"},
+{text:"Stock markets react to new tech regulations globally",src:"https://images.pexels.com/photos/210607/pexels-photo-210607.jpeg",type:"image"}
 ]}
 ];
 
@@ -139,8 +139,7 @@ function deleteStory(i){if(!confirm("Delete this story?"))return;stories.splice(
 function renderStories(){storiesFeed.innerHTML="";stories.forEach((s,index)=>{const d=document.createElement("div");d.className="border p-3 rounded";const followed=follows.includes(s.user);
 let content="";
 if(s.mediaType==="image"){content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;}
-else if(s.mediaType==="youtube"){content=`<div class="w-full relative" style="padding-top:56.25%;">
-<iframe src="${s.src}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute top-0 left-0 w-full h-full rounded"></iframe></div><p class='mt-1 text-sm'>${s.text||""}</p>`;}
+else if(s.mediaType==="gif"){content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;}
 else if(s.mediaType==="video"){content=`<video src='${s.src}' controls playsinline class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;}
 const canDelete = s.user === (localStorage.vaz_user || "Guest");
 d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b>
