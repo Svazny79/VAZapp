@@ -73,7 +73,7 @@ body{font-family:Arial,sans-serif;transition:.3s}
 window.onload=()=>{setTimeout(()=>{logoAnimation.style.opacity=0;setTimeout(()=>logoAnimation.remove(),1000)},1500)}
 
 // Pages
-const chatPage=chatPageEl=document.getElementById("chatPage");
+const chatPage=document.getElementById("chatPage");
 const storiesPage=document.getElementById("storiesPage");
 const profilePage=document.getElementById("profilePage");
 
@@ -108,6 +108,47 @@ let likes=JSON.parse(localStorage.vaz_likes||"{}");
 let comments=JSON.parse(localStorage.vaz_comments||"{}");
 let follows=JSON.parse(localStorage.vaz_follows||"[]");
 
+// Fake News/Sports Users (24h rotation)
+const fakeUsers=[
+  {user:"NHL",posts:[
+    "Overtime thriller as underdogs win late tonight 🏒",
+    "Star player scores hat trick in huge matchup",
+    "Playoff race heats up across the league"
+  ]},
+  {user:"NBC-News",posts:[
+    "Breaking: Major storm impacts East Coast",
+    "Global leaders meet for emergency summit",
+    "Markets react to new tech regulations"
+  ]},
+  {user:"WorldUpdate",posts:[
+    "Volcano activity monitored in Pacific region",
+    "New medical breakthrough announced",
+    "Historic peace talks continue"
+  ]}
+];
+
+function generateFakeStories(){
+  const last=localStorage.vaz_fake_time||0;
+  const now=Date.now();
+
+  if(now-last>86400000){ // 24 hours
+    fakeUsers.forEach(f=>{
+      const post=f.posts[Math.floor(Math.random()*f.posts.length)];
+      stories.unshift({
+        id:Date.now()+Math.random(),
+        user:f.user,
+        vid:"",
+        text:post,
+        fake:true
+      });
+    });
+    localStorage.vaz_fake_time=now;
+    saveStories();
+  }
+}
+
+generateFakeStories();
+
 function uploadStory(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",vid:r.result});saveStories();renderStories()};r.readAsDataURL(f)}
 
 function saveStories(){localStorage.vaz_stories=JSON.stringify(stories);localStorage.vaz_likes=JSON.stringify(likes);localStorage.vaz_comments=JSON.stringify(comments);localStorage.vaz_follows=JSON.stringify(follows)}
@@ -123,12 +164,21 @@ if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"
 const d=document.createElement("div");
 d.className="border p-3 rounded";
 const followed=follows.includes(s.user);
-d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick="toggleFollow('${s.user}')" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
-<video src='${s.vid}' controls class='w-full rounded mb-1'></video>
+
+let content="";
+if(s.fake){
+  content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;
+}else{
+  content=`<video src='${s.vid}' controls class='w-full rounded mb-1'></video>`;
+}
+
+d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
+${content}
 <div class='flex gap-3 text-sm'>
-<button onclick="likeStory(${s.id})">❤️ ${likes[s.id]||0}</button>
-<button onclick="addComment(${s.id})">💬 ${comments[s.id]?comments[s.id].length:0}</button>
+<button onclick=\"likeStory(${s.id})\">❤️ ${likes[s.id]||0}</button>
+<button onclick=\"addComment(${s.id})\">💬 ${comments[s.id]?comments[s.id].length:0}</button>
 </div>`;
+
 storiesFeed.appendChild(d)})}
 
 // Load
