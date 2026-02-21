@@ -92,38 +92,25 @@ transition:opacity 1s ease;
 /* SPLASH */
 window.addEventListener("load",()=>{
   const logo=document.getElementById("logoAnimation");
-  setTimeout(()=>{
-    logo.style.opacity="0";
-    setTimeout(()=>logo.remove(),1200);
-  },1500);
+  setTimeout(()=>{logo.style.opacity="0"; setTimeout(()=>logo.remove(),1200);},1500);
 });
 
 /* PWA */
-const manifest={
-  name:"VAZapp",
-  short_name:"VAZapp",
-  start_url:".",
-  display:"standalone",
-  background_color:"#000000",
-  theme_color:"#2563eb",
-  description:"VAZapp with vazAI and Stories",
-  icons:[
-    {src:"https://via.placeholder.com/192",sizes:"192x192",type:"image/png"},
-    {src:"https://via.placeholder.com/512",sizes:"512x512",type:"image/png"}
-  ]
-};
-const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
-document.getElementById("manifestPlaceholder").href=URL.createObjectURL(blob);
+const manifest={name:"VAZapp",short_name:"VAZapp",start_url:".",display:"standalone",
+background_color:"#000000",theme_color:"#2563eb",description:"VAZapp with vazAI and Stories",
+icons:[
+{src:"https://via.placeholder.com/192",sizes:"192x192",type:"image/png"},
+{src:"https://via.placeholder.com/512",sizes:"512x512",type:"image/png"}
+]};
+document.getElementById("manifestPlaceholder").href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:"application/json"}));
 
 if("serviceWorker" in navigator){
   const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('vazapp').then(c=>c.addAll(['./'])))});
   self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));})`;
-  const swBlob=new Blob([swCode],{type:"text/javascript"});
-  const swURL=URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swURL);
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:"text/javascript"})));
 }
 
-/* NAV */
+/* NAVIGATION */
 const chatPage=document.getElementById("chatPage");
 const storiesPage=document.getElementById("storiesPage");
 const profilePage=document.getElementById("profilePage");
@@ -131,13 +118,13 @@ function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.ad
 function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories();}
 function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden");}
 
-/* DARK */
+/* DARK MODE */
 function toggleDark(){body.classList.toggle("dark");localStorage.vaz_dark=body.classList.contains("dark");}
 
 /* PROFILE */
 function loadImage(e){const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(e.target.files[0]);}
 function saveProfile(){localStorage.vaz_user=usernameInput.value||"Guest";localStorage.vaz_avatar=profilePreview.src;loadProfile();showChat();}
-function loadProfile(){chatName.textContent=localStorage.vaz_user||"Guest";usernameInput.value=localStorage.vaz_user||"";if(localStorage.vaz_avatar){chatAvatar.src=localStorage.vaz_avatar;profilePreview.src=localStorage.vaz_avatar}}
+function loadProfile(){chatName.textContent=localStorage.vaz_user||"Guest";usernameInput.value=localStorage.vaz_user||"";if(localStorage.vaz_avatar){chatAvatar.src=localStorage.vaz_avatar;profilePreview.src=localStorage.vaz_avatar;}}
 
 /* CHAT */
 function addMsg(t,s){const d=document.createElement("div");d.className=s==="u"?"text-right text-blue-500":"text-left text-green-500";d.textContent=(s==="u"?"You: ":"vazAI: ")+t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
@@ -156,45 +143,48 @@ function ai(m){
 }
 
 /* STORIES */
-let stories=JSON.parse(localStorage.vaz_stories||"[]");
-let likes=JSON.parse(localStorage.vaz_likes||"{}");
-let comments=JSON.parse(localStorage.vaz_comments||"{}");
-let follows=JSON.parse(localStorage.vaz_follows||"[]");
+let stories=[];
+let likes={};
+let comments={};
+let follows=[];
 
-/* FAKE USERS WITH DETAILED POSTS */
+/* NEW DETAILED FAKE STORIES */
 const fakeUsers=[
   {user:"NHL",posts:[
-    {text:"Toronto Maple Leafs defeat Boston Bruins 4–3 in overtime at Scotiabank Arena 🏒",src:"https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Connor McDavid scores 2 goals as Edmonton Oilers beat Calgary Flames in Battle of Alberta",src:"https://images.unsplash.com/photo-1505842465776-3a8f84b0c84a?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Madison Square Garden sold out as Rangers secure playoff spot",src:"https://images.unsplash.com/photo-1541854615482-1e202b3b6e2c?auto=format&fit=crop&w=900&q=80",type:"image"}
+    {text:"Toronto Maple Leafs edge Boston Bruins 4–3 in overtime at Scotiabank Arena 🏒",src:"https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Connor McDavid scores 2 goals as Edmonton Oilers defeat Calgary Flames in packed Rogers Place",src:"https://images.unsplash.com/photo-1505842465776-3a8f84b0c84a?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Rangers secure playoff spot in sold-out Madison Square Garden",src:"https://images.unsplash.com/photo-1541854615482-1e202b3b6e2c?auto=format&fit=crop&w=900&q=80",type:"image"}
   ]},
   {user:"NBC-News",posts:[
-    {text:"Flash flooding reported in Miami after 7 inches of rain overnight, officials urge residents to stay indoors",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"World leaders gather in Geneva for emergency climate summit",src:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Stock markets drop after new tech regulations announced in Washington",src:"https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=900&q=80",type:"image"}
+    {text:"Flash flooding in Miami after overnight heavy rain, officials warn residents to stay indoors",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Emergency climate summit begins in Geneva with world leaders",src:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Stock markets drop following new tech regulations announced in Washington",src:"https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=900&q=80",type:"image"}
   ]}
 ];
 
+/* RESET STORIES */
 function generateFakeStories(){
-  const last=localStorage.vaz_fake_time||0;
-  const now=Date.now();
-  if(now-last>86400000){
-    fakeUsers.forEach(f=>{
-      const p=f.posts[Math.floor(Math.random()*f.posts.length)];
-      stories.unshift({id:Date.now()+Math.random(),user:f.user,src:p.src,mediaType:p.type,text:p.text,fake:true});
+  stories = []; // clear old stories
+  fakeUsers.forEach(f=>{
+    f.posts.forEach(p=>{
+      stories.push({id:Date.now()+Math.random(),user:f.user,src:p.src,mediaType:p.type,text:p.text,fake:true});
     });
-    localStorage.vaz_fake_time=now;
-    saveStories();
-  }
+  });
+  saveStories();
 }
 generateFakeStories();
 
+/* USER STORY UPLOAD */
 function uploadStory(e){
   const f=e.target.files[0];if(!f)return;
   const caption=prompt("Caption:")||"My story";
   const type=f.type.startsWith("image")?"image":"video";
   const r=new FileReader();
-  r.onload=()=>{stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",src:r.result,mediaType:type,text:caption,fake:false});saveStories();renderStories();};
+  r.onload=()=>{
+    stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",src:r.result,mediaType:type,text:caption,fake:false});
+    saveStories();
+    renderStories();
+  };
   r.readAsDataURL(f);
 }
 
@@ -204,7 +194,7 @@ function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories();
 function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories();}
 function deleteStory(i){if(!confirm("Delete this story?"))return;stories.splice(i,1);saveStories();renderStories();}
 
-/* RENDER ALL STORIES (FAKE + USER) */
+/* RENDER ALL STORIES */
 function renderStories(){
   storiesFeed.innerHTML="";
   stories.forEach((s,index)=>{
@@ -231,7 +221,7 @@ function renderStories(){
 }
 
 /* INIT */
-if(!localStorage.vaz_user){setTimeout(()=>{let u=prompt("Choose a username:", "Guest");if(u)localStorage.vaz_user=u;loadProfile();alert("Logged in as "+u);},500);}
+if(!localStorage.vaz_user){setTimeout(()=>{let u=prompt("Choose a username:","Guest");if(u)localStorage.vaz_user=u;loadProfile();alert("Logged in as "+u);},500);}
 function init(){if(localStorage.vaz_dark==="true")body.classList.add("dark");loadProfile();addMsg("Hi! I'm vazAI 🤖","a");renderStories();}
 init();
 </script>
