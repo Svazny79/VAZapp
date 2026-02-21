@@ -1,252 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VAZapp</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      transition: background 0.3s, color 0.3s;
-    }
-
-    .dark { background: #111827; color: white; }
-    .dark .bg-white { background: #1f2933 !important; color: white; }
-
-    /* Logo Animation */
-    @keyframes auraGlow {
-      0%,100% { text-shadow:0 0 5px #0ff,0 0 10px #0ff,0 0 20px #0ff; }
-      50% { text-shadow:0 0 15px #0ff,0 0 30px #0ff,0 0 40px #0ff; }
-    }
-    .logo-animation {
-      position: fixed; top:0; left:0; width:100%; height:100%;
-      display:flex; justify-content:center; align-items:center;
-      background:#000; z-index:9999; opacity:1; transform:scale(0.5);
-      transition:opacity 1s, transform 1s;
-      font-size:3rem; font-weight:bold;
-    }
-    .logo-animation span.highlight { color:#0ff; animation:auraGlow 1.5s infinite alternate; }
-    .logo-animation span.app { color:#fff; font-weight:bolder; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VAZapp</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+body{font-family:Arial,sans-serif;transition:.3s}
+.dark{background:#111827;color:#fff}
+.dark .bg-white{background:#1f2933!important;color:#fff}
+@keyframes auraGlow{0%,100%{text-shadow:0 0 5px #0ff,0 0 15px #0ff}50%{text-shadow:0 0 25px #0ff,0 0 40px #0ff}}
+.logo-animation{position:fixed;inset:0;display:flex;justify-content:center;align-items:center;background:#000;z-index:9999;font-size:3rem;font-weight:bold;transition:1s}
+.logo-animation .highlight{color:#0ff;animation:auraGlow 1.5s infinite}
+.logo-animation .app{color:#fff;font-weight:900}
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col" id="body">
+<body id="body" class="bg-gray-100 min-h-screen flex flex-col">
 
-  <!-- Logo Animation Overlay -->
-  <div id="logoAnimation" class="logo-animation">
-    <span><span class="highlight">VAZ</span><span class="app">app</span></span>
-  </div>
+<!-- Splash -->
+<div id="logoAnimation" class="logo-animation">
+<span><span class="highlight">VAZ</span><span class="app">app</span></span>
+</div>
 
-  <!-- Header -->
-  <header class="bg-blue-600 text-white p-4 shadow flex justify-between items-center">
-    <h1 class="text-2xl font-bold">🤖 VAZapp</h1>
-    <div class="space-x-2">
-      <button onclick="showChat()" class="bg-blue-500 px-3 py-1 rounded">Chat</button>
-      <button onclick="showChat()" class="bg-blue-500 px-3 py-1 rounded">Chat</button>
-      <button onclick="showStories()" class="bg-blue-500 px-3 py-1 rounded">Stories</button>
-      <button onclick="showProfile()" class="bg-blue-500 px-3 py-1 rounded">Profile</button>
-      <button onclick="toggleDarkMode()" class="bg-gray-800 px-3 py-1 rounded">🌙</button>
-    </div>
-  </header>
+<!-- Header -->
+<header class="bg-blue-600 text-white p-4 flex justify-between">
+<h1 class="font-bold text-xl">VAZapp</h1>
+<div class="space-x-2">
+<button onclick="showChat()" class="bg-blue-500 px-3 py-1 rounded">Chat</button>
+<button onclick="showStories()" class="bg-blue-500 px-3 py-1 rounded">Stories</button>
+<button onclick="showProfile()" class="bg-blue-500 px-3 py-1 rounded">Profile</button>
+<button onclick="toggleDark()" class="bg-gray-800 px-3 py-1 rounded">🌙</button>
+</div>
+</header>
 
-  <main class="flex-1 flex justify-center items-center p-4">
+<main class="flex-1 p-4 flex justify-center items-start">
 
-    <!-- CHAT PAGE -->
-    <div id="chatPage" class="bg-white w-full max-w-2xl rounded-2xl shadow-lg p-6 flex flex-col">
-      <div class="flex items-center gap-3 mb-3">
-        <img id="chatAvatar" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full">
-        <span id="chatName" class="font-bold">Guest</span>
-      </div>
-      <div id="chat" class="flex-1 overflow-y-auto mb-4 space-y-2 p-2 border rounded"></div>
-      <div class="flex gap-2">
-        <input id="userInput" type="text" placeholder="Type your message..." class="flex-1 border rounded-lg p-2 text-black dark:text-white bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        <button onclick="sendMessage()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">Send</button>
-      </div>
-    </div>
+<!-- Chat -->
+<div id="chatPage" class="bg-white w-full max-w-xl p-4 rounded shadow flex flex-col">
+<div class="flex items-center gap-2 mb-2">
+<img id="chatAvatar" class="w-8 h-8 rounded-full" src="https://via.placeholder.com/40">
+<span id="chatName" class="font-bold">Guest</span>
+</div>
+<div id="chat" class="flex-1 border p-2 rounded mb-2 overflow-y-auto"></div>
+<div class="flex gap-2">
+<input id="userInput" class="flex-1 border p-2 rounded text-black dark:text-white bg-white dark:bg-gray-700" placeholder="Type...">
+<button onclick="sendMessage()" class="bg-blue-600 text-white px-3 rounded">Send</button>
+</div>
+</div>
 
-    <!-- STORIES PAGE -->
-    <div id="storiesPage" class="hidden bg-white w-full max-w-3xl rounded-2xl shadow-lg p-6 overflow-y-auto">
-      <h2 class="text-2xl font-bold mb-4 text-center">📸 Stories</h2>
+<!-- Stories -->
+<div id="storiesPage" class="hidden bg-white w-full max-w-2xl p-4 rounded shadow">
+<h2 class="text-xl font-bold mb-2">📸 Stories</h2>
+<input type="file" accept="video/*" onchange="uploadStory(event)" class="mb-3">
+<div id="storiesFeed" class="space-y-4"></div>
+</div>
 
-      <div class="mb-4 border rounded-lg p-3">
-        <h3 class="font-semibold mb-2">Post a Story</h3>
-        <input type="file" accept="video/*" onchange="uploadStory(event)" class="mb-2" />
-      </div>
+<!-- Profile -->
+<div id="profilePage" class="hidden bg-white w-full max-w-md p-4 rounded shadow">
+<h2 class="text-xl font-bold mb-3">Profile</h2>
+<img id="profilePreview" class="w-24 h-24 rounded-full mx-auto mb-2" src="https://via.placeholder.com/120">
+<input type="file" accept="image/*" onchange="loadImage(event)"><br><br>
+<input id="usernameInput" class="border p-2 w-full mb-2" placeholder="Username">
+<button onclick="saveProfile()" class="bg-blue-600 text-white w-full p-2 rounded">Save</button>
+</div>
 
-      <div id="storiesFeed" class="space-y-4"></div>
-    </div>
+</main>
 
-    <!-- PROFILE PAGE -->
-    <div id="profilePage" class="hidden bg-white w-full max-w-xl rounded-2xl shadow-lg p-6">
-      <h2 class="text-2xl font-bold mb-4 text-center">👤 Your Profile</h2>
-      <div class="flex flex-col items-center gap-4">
-        <img id="profilePreview" src="https://via.placeholder.com/120" class="w-32 h-32 rounded-full border">
-        <input type="file" accept="image/*" onchange="loadImage(event)" class="text-sm" />
-        <input id="usernameInput" type="text" placeholder="Enter username" class="border rounded-lg p-2 w-full" />
-        <button onclick="saveProfile()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 w-full">Save Profile</button>
-      </div>
-    </div>
+<footer class="bg-gray-200 p-2 text-center text-sm">©2026 VAZapp</footer>
 
-  </main>
+<script>
+// Splash
+window.onload=()=>{setTimeout(()=>{logoAnimation.style.opacity=0;setTimeout(()=>logoAnimation.remove(),1000)},1500)}
 
-  <footer class="bg-gray-200 text-center p-2 text-sm">© 2026 VAZapp</footer>
+// Pages
+const chatPage=chatPageEl=document.getElementById("chatPage");
+const storiesPage=document.getElementById("storiesPage");
+const profilePage=document.getElementById("profilePage");
 
-  <script>
-    // Logo animation
-    window.addEventListener('load',()=>{
-      const logo=document.getElementById('logoAnimation');
-      setTimeout(()=>{
-        logo.style.opacity='0';
-        logo.style.transform='scale(1.5)';
-        setTimeout(()=>logo.remove(),1000);
-      },1500);
-    });
+function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.add("hidden");profilePage.classList.add("hidden")}
+function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories()}
+function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden")}
 
-    // Elements
-    const chat=document.getElementById("chat"), input=document.getElementById("userInput"), body=document.getElementById("body");
-    const chatPage=document.getElementById("chatPage"), storiesPage=document.getElementById("storiesPage"), profilePage=document.getElementById("profilePage");("chatPage"), profilePage=document.getElementById("profilePage");
-    const chatName=document.getElementById("chatName"), chatAvatar=document.getElementById("chatAvatar");
-    const profilePreview=document.getElementById("profilePreview"), usernameInput=document.getElementById("usernameInput");
+// Dark
+function toggleDark(){body.classList.toggle("dark");localStorage.vaz_dark=body.classList.contains("dark")}
 
-    // Page & Dark Mode
-    function showChat(){chatPage.classList.remove("hidden"); profilePage.classList.add("hidden");}
-    function showChat(){chatPage.classList.remove("hidden"); storiesPage.classList.add("hidden"); profilePage.classList.add("hidden");}
-    function showStories(){storiesPage.classList.remove("hidden"); chatPage.classList.add("hidden"); profilePage.classList.add("hidden");}
-    function showProfile(){profilePage.classList.remove("hidden"); chatPage.classList.add("hidden"); storiesPage.classList.add("hidden");}("hidden"); chatPage.classList.add("hidden");}
-    function toggleDarkMode(){body.classList.toggle("dark"); localStorage.setItem("vaz_dark",body.classList.contains("dark"));}
+// Profile
+function loadImage(e){const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(e.target.files[0])}
+function saveProfile(){localStorage.vaz_user=usernameInput.value||"Guest";localStorage.vaz_avatar=profilePreview.src;loadProfile();showChat()}
+function loadProfile(){chatName.textContent=localStorage.vaz_user||"Guest";usernameInput.value=localStorage.vaz_user||"";if(localStorage.vaz_avatar){chatAvatar.src=localStorage.vaz_avatar;profilePreview.src=localStorage.vaz_avatar}}
 
-    // Profile
-    function loadImage(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(f);}
-    function saveProfile(){const u=usernameInput.value||"Guest",a=profilePreview.src;localStorage.setItem("vaz_username",u);localStorage.setItem("vaz_avatar",a);loadProfile();showChat();alert("Profile Saved! ✅");}
-    function loadProfile(){const n=localStorage.getItem("vaz_username"),a=localStorage.getItem("vaz_avatar");if(n){chatName.innerText=n;usernameInput.value=n;}if(a){chatAvatar.src=a;profilePreview.src=a;}}
+// Chat
+function addMsg(t,s){const d=document.createElement("div");d.className=s==="u"?"text-right text-blue-500":"text-left text-green-500";d.textContent=(s==="u"?"You: ":"vazAI: ")+t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight}
+function sendMessage(){const t=userInput.value.trim();if(!t)return;addMsg(t,"u");userInput.value="";setTimeout(()=>addMsg(ai(t),"a"),600)}
+userInput.onkeydown=e=>{if(e.key==="Enter")sendMessage()}
 
-    // Chat memory cleared on reload
-    function saveChat(){/* do nothing to clear chat on reload */}
-    function loadChat(){chat.innerHTML=""; addMessage("Hi! I'm vazAI 🤖","ai");}
+function ai(m){m=m.toLowerCase();
+if(/\d+[+\-*/]\d+/.test(m))return"Answer: "+eval(m);
+if(m.startsWith("how"))return"Let’s solve this step by step. What part is confusing?";
+if(m.startsWith("what")||m.startsWith("who"))return"Good question! Tell me more.";
+if(m.includes("code"))return"Tell me what you’re building.";
+if(m.includes("sad")||m.includes("stress"))return"I’m here for you. Want to talk?";
+return"Tell me more so I can help better."}
 
-    // Add message
-    function addMessage(text,sender){const div=document.createElement("div");div.className=sender==="user"?"text-right text-blue-400":"text-left text-green-400";div.innerText=(sender==="user"?"You: ":"vazAI: ")+text;chat.appendChild(div);chat.scrollTop=chat.scrollHeight;}
-    input.addEventListener("keypress",e=>{if(e.key==='Enter')sendMessage();});
-    function sendMessage(){const t=input.value.trim();if(!t)return;addMessage(t,"user");input.value="";setTimeout(()=>addMessage(getAIResponse(t),"ai"),600);}
+// Stories
+let stories=JSON.parse(localStorage.vaz_stories||"[]");
+let likes=JSON.parse(localStorage.vaz_likes||"{}");
+let comments=JSON.parse(localStorage.vaz_comments||"{}");
+let follows=JSON.parse(localStorage.vaz_follows||"[]");
 
-    // Smarter AI responses
-    function getAIResponse(msg){
-      const original = msg;
-      msg = msg.toLowerCase();
+function uploadStory(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",vid:r.result});saveStories();renderStories()};r.readAsDataURL(f)}
 
-      // Math
-      if(/\d+\s*[+\-*/]\s*\d+/.test(msg)){
-        try{
-          const result = eval(msg);
-          return `The answer is ${result}. Want me to explain how?`;
-        }catch{
-          return "That looks like a math problem. Can you rewrite it clearly?";
-        }
-      }
+function saveStories(){localStorage.vaz_stories=JSON.stringify(stories);localStorage.vaz_likes=JSON.stringify(likes);localStorage.vaz_comments=JSON.stringify(comments);localStorage.vaz_follows=JSON.stringify(follows)}
 
-      // Definitions
-      if(msg.startsWith("what is") || msg.startsWith("who is") || msg.startsWith("define")){
-        return "Good question! Let me explain: " + original.replace(/^(what is|who is|define)/i, "").trim() + " is something I can help you understand. Can you be more specific?";
-      }
+function toggleFollow(u){follows.includes(u)?follows=follows.filter(x=>x!==u):follows.push(u);saveStories();renderStories()}
 
-      // How-to
-      if(msg.startsWith("how to") || msg.includes("how do i")){
-        return "Let’s break it down step by step. First, tell me what part you’re stuck on.";
-      }
+function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories()}
 
-      // Coding
-      if(msg.includes("code") || msg.includes("html") || msg.includes("css") || msg.includes("javascript")){
-        return "Nice! Tell me what you're building and I’ll help you write the code.";
-      }
+function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories()}
 
-      // Feelings
-      if(msg.includes("sad") || msg.includes("angry") || msg.includes("stressed")){
-        return "I’m here for you. Want to talk about what’s going on?";
-      }
+function renderStories(){storiesFeed.innerHTML="";stories.forEach(s=>{
+if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"Guest"))return;
+const d=document.createElement("div");
+d.className="border p-3 rounded";
+const followed=follows.includes(s.user);
+d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick="toggleFollow('${s.user}')" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
+<video src='${s.vid}' controls class='w-full rounded mb-1'></video>
+<div class='flex gap-3 text-sm'>
+<button onclick="likeStory(${s.id})">❤️ ${likes[s.id]||0}</button>
+<button onclick="addComment(${s.id})">💬 ${comments[s.id]?comments[s.id].length:0}</button>
+</div>`;
+storiesFeed.appendChild(d)})}
 
-      // Greetings
-      if(msg.includes("hello") || msg.includes("hi") || msg.includes("hey")){
-        return "Hey! 😊 What would you like to talk about today?";
-      }
-
-      // School
-      if(msg.includes("homework") || msg.includes("school") || msg.includes("test")){
-        return "Tell me the question and I’ll help you solve it step by step.";
-      }
-
-      // Technology
-      if(msg.includes("computer") || msg.includes("app") || msg.includes("website")){
-        return "Cool! Are you trying to build, fix, or improve something?";
-      }
-
-      // Why questions
-      if(msg.startsWith("why")){
-        return "That’s a thoughtful question. Let’s think it through together. What made you ask?";
-      }
-
-      // Default intelligent fallback
-      return "That’s interesting. Can you give me a bit more detail so I can help better?";
-    }
-
-    // Stories system
-    let stories = JSON.parse(localStorage.getItem("vaz_stories")||"[]");
-    let following = JSON.parse(localStorage.getItem("vaz_following")||"[]");
-
-    function uploadStory(e){
-      const file=e.target.files[0];
-      if(!file)return;
-      const r=new FileReader();
-      r.onload=()=>{
-        const user=localStorage.getItem("vaz_username")||"Guest";
-        const story={user,video:r.result,id:Date.now()};
-        stories.unshift(story);
-        localStorage.setItem("vaz_stories",JSON.stringify(stories));
-        renderStories();
-      };
-      r.readAsDataURL(file);
-    }
-
-    function toggleFollow(user){
-      if(following.includes(user)){
-        following=following.filter(u=>u!==user);
-      } else {
-        following.push(user);
-      }
-      localStorage.setItem("vaz_following",JSON.stringify(following));
-      renderStories();
-    }
-
-    function renderStories(){
-      const feed=document.getElementById("storiesFeed");
-      feed.innerHTML="";
-
-      stories.forEach(s=>{
-        if(following.length && !following.includes(s.user) && s.user!==(localStorage.getItem("vaz_username")||"Guest")) return;
-
-        const div=document.createElement("div");
-        div.className="border rounded-lg p-3";
-
-        const isFollowed=following.includes(s.user);
-
-        div.innerHTML=`
-          <div class="flex justify-between items-center mb-2">
-            <strong>${s.user}</strong>
-            <button onclick="toggleFollow('${s.user}')" class="text-sm text-blue-600">
-              ${isFollowed?"Unfollow":"Follow"}
-            </button>
-          </div>
-          <video src="${s.video}" controls class="w-full rounded"></video>
-        `;
-
-        feed.appendChild(div);
-      });
-    }
-
-    // Load settings
-    function loadSettings(){if(localStorage.getItem("vaz_dark")==="true")body.classList.add("dark");loadProfile();loadChat();}
-    loadSettings();
-  </script>
+// Load
+function init(){if(localStorage.vaz_dark==="true")body.classList.add("dark");loadProfile();addMsg("Hi! I'm vazAI 🤖","a")}
+init();
+</script>
 </body>
 </html>
