@@ -108,24 +108,22 @@ let likes=JSON.parse(localStorage.vaz_likes||"{}");
 let comments=JSON.parse(localStorage.vaz_comments||"{}");
 let follows=JSON.parse(localStorage.vaz_follows||"[]");
 
-// Fake News/Sports Users (24h rotation)
+// Fake News/Sports Users (24h rotation with media)
 const fakeUsers=[
   {user:"NHL",posts:[
-    "Maple Leafs dominate in 5-2 win over rivals 🏒",
-    "Oilers and Avalanche clash in playoff-style showdown",
-    "Rangers edge Bruins in intense overtime battle",
-    "Lightning extend winning streak with shutout victory",
-    "Golden Knights secure top spot in division"
+    {text:"Maple Leafs dominate in 5-2 win over rivals 🏒",src:"https://source.unsplash.com/featured/?nhl,hockey",type:"image"},
+    {text:"Playoff intensity in last night’s showdown",src:"https://source.unsplash.com/featured/?ice,hockey,arena",type:"image"},
+    {text:"Overtime thriller stuns fans",src:"https://source.unsplash.com/featured/?hockey,stadium,game",type:"image"}
   ]},
   {user:"NBC-News",posts:[
-    "Breaking: Major storm impacts East Coast",
-    "Global leaders meet for emergency summit",
-    "Markets react to new tech regulations"
+    {text:"Major storm impacts East Coast",src:"https://source.unsplash.com/featured/?storm,hurricane,news",type:"image"},
+    {text:"World leaders meet for summit",src:"https://source.unsplash.com/featured/?politics,conference,meeting",type:"image"},
+    {text:"City hit by flooding overnight",src:"https://source.unsplash.com/featured/?flood,city,weather",type:"image"}
   ]},
   {user:"WorldUpdate",posts:[
-    "Volcano activity monitored in Pacific region",
-    "New medical breakthrough announced",
-    "Historic peace talks continue"
+    {text:"Volcano activity monitored",src:"https://source.unsplash.com/featured/?volcano,nature,eruption",type:"image"},
+    {text:"Medical breakthrough announced",src:"https://source.unsplash.com/featured/?medical,lab,science",type:"image"},
+    {text:"Historic peace talks continue",src:"https://source.unsplash.com/featured/?diplomacy,meeting,flags",type:"image"}
   ]}
 ];
 
@@ -139,8 +137,9 @@ function generateFakeStories(){
       stories.unshift({
         id:Date.now()+Math.random(),
         user:f.user,
-        vid:"",
-        text:post,
+        src:post.src,
+        mediaType:post.type,
+        text:post.text,
         fake:true
       });
     });
@@ -151,37 +150,36 @@ function generateFakeStories(){
 
 generateFakeStories();
 
-function uploadStory(e){
-  const f=e.target.files[0];
-  if(!f) return;
-  const caption = prompt("Add a caption for your story:") || "My new story";
-  const type = f.type.startsWith("image") ? "image" : "video";
+function renderStories(){
+  storiesFeed.innerHTML="";
+  stories.forEach(s=>{
+    if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"Guest"))return;
 
-  const r = new FileReader();
-  r.onload = () => {
-    stories.unshift({
-      id: Date.now(),
-      user: localStorage.vaz_user || "Guest",
-      src: r.result,
-      mediaType: type,
-      text: caption,
-      fake: false
-    });
-    saveStories();
-    renderStories();
-  };
-  r.readAsDataURL(f);
+    const d=document.createElement("div");
+    d.className="border p-3 rounded";
+    const followed=follows.includes(s.user);
+
+    let content="";
+
+    if(s.mediaType==="image"){
+      content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;
+    }else if(s.mediaType==="video"){
+      content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
+    }else{
+      content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;
+    }
+
+    d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
+    ${content}
+    <div class='flex gap-3 text-sm'>
+    <button onclick=\"likeStory(${s.id})\">❤️ ${likes[s.id]||0}</button>
+    <button onclick=\"addComment(${s.id})\">💬 ${comments[s.id]?comments[s.id].length:0}</button>
+    </div>`;
+
+    storiesFeed.appendChild(d);
+  });
 }
-
-function saveStories(){localStorage.vaz_stories=JSON.stringify(stories);localStorage.vaz_likes=JSON.stringify(likes);localStorage.vaz_comments=JSON.stringify(comments);localStorage.vaz_follows=JSON.stringify(follows)}
-
-function toggleFollow(u){follows.includes(u)?follows=follows.filter(x=>x!==u):follows.push(u);saveStories();renderStories()}
-
-function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories()}
-
-function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories()}
-
-function renderStories(){storiesFeed.innerHTML="";stories.forEach(s=>{
+storiesFeed.innerHTML="";stories.forEach(s=>{
 if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"Guest"))return;
 const d=document.createElement("div");
 d.className="border p-3 rounded";
