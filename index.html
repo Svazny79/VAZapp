@@ -4,296 +4,305 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAZapp</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="manifest" id="manifestPlaceholder">
+<meta name="theme-color" content="#2563eb">
 
 <style>
-body{margin:0;font-family:Arial;background:#111;color:#fff}
-.hidden{display:none}
+body{font-family:Arial,sans-serif;transition:.3s}
+.dark{background:#111827;color:#fff}
+.dark .bg-white{background:#1f2933!important;color:#fff}
 
-/* Splash */
-#splash{
-position:fixed;inset:0;background:black;
-display:flex;align-items:center;justify-content:center;
+@keyframes auraGlow{
+0%,100%{text-shadow:0 0 5px #0ff,0 0 15px #0ff}
+50%{text-shadow:0 0 25px #0ff,0 0 40px #0ff}
+}
+
+@keyframes fadeZoom{
+0%{opacity:0;transform:scale(1.3)}
+50%{opacity:1;transform:scale(1)}
+100%{opacity:0;transform:scale(0.9)}
+}
+
+.logo-animation{
+position:fixed;
+inset:0;
+display:flex;
+justify-content:center;
+align-items:center;
+background:#000;
 z-index:9999;
-}
-#logo{
-font-size:48px;font-weight:bold;
-animation:pulse 2s infinite;
-}
-#logo span{color:#00f0ff;text-shadow:0 0 20px #00f0ff}
-
-@keyframes pulse{
-0%{opacity:.5}
-50%{opacity:1}
-100%{opacity:.5}
+font-size:3.5rem;
+font-weight:bold;
+animation:fadeZoom 2.5s ease forwards;
 }
 
-/* Layout */
-header{background:#000;padding:10px;text-align:center}
-nav button{margin:5px;padding:8px}
+.logo-animation .highlight{color:#0ff;animation:auraGlow 1.5s infinite}
+.logo-animation .app{color:#fff;font-weight:900}
 
-section{padding:10px}
-
-/* Stories */
-#stories{display:flex;gap:10px;overflow-x:auto}
-.story{
-width:80px;text-align:center;cursor:pointer
-}
-.story img,.story video{
-width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #0ff
+.story-media{
+width:100%;
+max-width:360px;
+height:640px;
+object-fit:cover;
+border-radius:12px;
+margin:auto;
+background:black;
 }
 
-/* Feed */
-.post{background:#222;margin:10px 0;padding:10px;border-radius:8px}
-.post img,.post video{
-width:100%;max-height:300px;object-fit:cover;border-radius:6px
+.story-box{
+display:flex;
+flex-direction:column;
+align-items:center;
 }
 
-/* Chat */
-#chatBox{height:300px;overflow-y:auto;background:#000;padding:5px}
-.msg{margin:5px}
-.user{color:#0ff}
-.ai{color:#0f0}
-
-/* Profile */
-#profile img{width:100px;height:100px;border-radius:50%;object-fit:cover}
 </style>
 </head>
-<body>
+
+<body id="body" class="bg-gray-100 min-h-screen flex flex-col">
 
 <!-- Splash -->
-<div id="splash">
-<div id="logo"><span>VAZ</span>app</div>
+<div id="logoAnimation" class="logo-animation">
+<span><span class="highlight">VAZ</span><span class="app">app</span></span>
 </div>
 
-<header>
-<h2>VAZapp</h2>
-<nav>
-<button onclick="show('home')">Home</button>
-<button onclick="show('chat')">vazAI</button>
-<button onclick="show('profile')">Profile</button>
-</nav>
+<!-- Header -->
+<header class="bg-blue-600 text-white p-4 flex justify-between">
+<h1 class="font-bold text-xl">VAZapp</h1>
+<div class="space-x-2">
+<button onclick="showChat()" class="bg-blue-500 px-3 py-1 rounded">Chat</button>
+<button onclick="showStories()" class="bg-blue-500 px-3 py-1 rounded">Stories</button>
+<button onclick="showProfile()" class="bg-blue-500 px-3 py-1 rounded">Profile</button>
+<button onclick="toggleDark()" class="bg-gray-800 px-3 py-1 rounded">🌙</button>
+</div>
 </header>
 
-<!-- Home -->
-<section id="home">
-<h3>Stories</h3>
-<div id="stories"></div>
-
-<h3>Feed</h3>
-<div id="feed"></div>
-
-<hr>
-<h3>Add Story</h3>
-<input type="file" id="storyFile"><br>
-<button onclick="addStory()">Post Story</button>
-</section>
+<main class="flex-1 p-4 flex justify-center items-start">
 
 <!-- Chat -->
-<section id="chat" class="hidden">
-<h3>vazAI</h3>
-<div id="chatBox"></div>
-<input id="chatInput" placeholder="Type...">
-<button onclick="sendMsg()">Send</button>
-</section>
+<div id="chatPage" class="bg-white w-full max-w-xl p-4 rounded shadow flex flex-col">
+<div class="flex items-center gap-2 mb-2">
+<img id="chatAvatar" class="w-8 h-8 rounded-full" src="https://via.placeholder.com/40">
+<span id="chatName" class="font-bold">Guest</span>
+</div>
+<div id="chat" class="flex-1 border p-2 rounded mb-2 overflow-y-auto"></div>
+<div class="flex gap-2">
+<input id="userInput" class="flex-1 border p-2 rounded text-black dark:text-white bg-white dark:bg-gray-700" placeholder="Type...">
+<button onclick="sendMessage()" class="bg-blue-600 text-white px-3 rounded">Send</button>
+</div>
+</div>
+
+<!-- Stories -->
+<div id="storiesPage" class="hidden bg-white w-full max-w-2xl p-4 rounded shadow">
+<h2 class="text-xl font-bold mb-2">📸 Stories</h2>
+<input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="mb-3">
+<div id="storiesFeed" class="space-y-6"></div>
+</div>
 
 <!-- Profile -->
-<section id="profile" class="hidden">
-<h3>Profile</h3>
-<img id="pfp"><br>
-<input type="file" id="pfpFile"><br>
-<input id="username" placeholder="Username"><br>
-<button onclick="saveProfile()">Save</button>
-</section>
+<div id="profilePage" class="hidden bg-white w-full max-w-md p-4 rounded shadow">
+<h2 class="text-xl font-bold mb-3">Profile</h2>
+<img id="profilePreview" class="w-24 h-24 rounded-full mx-auto mb-2" src="https://via.placeholder.com/120">
+<input type="file" accept="image/*" onchange="loadImage(event)"><br><br>
+<input id="usernameInput" class="border p-2 w-full mb-2" placeholder="Username">
+<button onclick="saveProfile()" class="bg-blue-600 text-white w-full p-2 rounded">Save</button>
+</div>
+
+</main>
+
+<footer class="bg-gray-200 p-2 text-center text-sm">©2026 VAZapp</footer>
 
 <script>
-/* Splash */
-setTimeout(()=>{
-document.getElementById('splash').style.display='none'
-},2500)
 
-/* Navigation */
-function show(id){
-document.querySelectorAll('section').forEach(s=>s.classList.add('hidden'))
-document.getElementById(id).classList.remove('hidden')
+/* Splash */
+window.addEventListener("load",()=>{
+  setTimeout(()=>{
+    document.getElementById("logoAnimation").remove();
+  },2600);
+});
+
+/* NAV */
+const chatPage=document.getElementById("chatPage");
+const storiesPage=document.getElementById("storiesPage");
+const profilePage=document.getElementById("profilePage");
+
+function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.add("hidden");profilePage.classList.add("hidden");}
+function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories();}
+function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden");}
+
+/* Dark */
+function toggleDark(){
+  body.classList.toggle("dark");
+  localStorage.vaz_dark=body.classList.contains("dark");
 }
 
 /* Profile */
-let profile=JSON.parse(localStorage.getItem('profile')||'{}')
-if(profile.name)document.getElementById('username').value=profile.name
-if(profile.img)document.getElementById('pfp').src=profile.img
+function loadImage(e){
+  const r=new FileReader();
+  r.onload=()=>profilePreview.src=r.result;
+  r.readAsDataURL(e.target.files[0]);
+}
 
 function saveProfile(){
-let name=username.value
-let file=pfpFile.files[0]
-if(file){
-let r=new FileReader()
-r.onload=()=>{
-profile={name, img:r.result}
-localStorage.setItem('profile',JSON.stringify(profile))
-pfp.src=r.result
+  localStorage.vaz_user=usernameInput.value||"Guest";
+  localStorage.vaz_avatar=profilePreview.src;
+  loadProfile();
+  showChat();
 }
-r.readAsDataURL(file)
-}else{
-profile.name=name
-localStorage.setItem('profile',JSON.stringify(profile))
+
+function loadProfile(){
+  chatName.textContent=localStorage.vaz_user||"Guest";
+  usernameInput.value=localStorage.vaz_user||"";
+  if(localStorage.vaz_avatar){
+    chatAvatar.src=localStorage.vaz_avatar;
+    profilePreview.src=localStorage.vaz_avatar;
+  }
 }
+
+/* Chat AI */
+function addMsg(t,s){
+  const d=document.createElement("div");
+  d.className=s==="u"?"text-right text-blue-500":"text-left text-green-500";
+  d.textContent=(s==="u"?"You: ":"vazAI: ")+t;
+  chat.appendChild(d);
+  chat.scrollTop=chat.scrollHeight;
+}
+
+function sendMessage(){
+  const t=userInput.value.trim();
+  if(!t)return;
+  addMsg(t,"u");
+  userInput.value="";
+  setTimeout(()=>addMsg(ai(t),"a"),500);
+}
+
+userInput.onkeydown=e=>{if(e.key==="Enter")sendMessage()};
+
+function ai(m){
+  m=m.toLowerCase();
+
+  if(m.includes("hello")||m.includes("hi")) return "Hey! How can I help you today?";
+  if(m.includes("who are you")) return "I'm vazAI, your smart assistant inside VAZapp.";
+  if(m.includes("help")) return "Tell me what you need and I'll walk you through it.";
+  if(m.includes("code")) return "What are you building? I can help you write it.";
+  if(m.includes("school")||m.includes("homework")) return "What subject is it? Let's solve it together.";
+  if(/\d+[+\-*/]\d+/.test(m)) return "Answer: "+eval(m);
+
+  return "Interesting question. Can you explain it a little more?";
 }
 
 /* Stories */
-let stories=JSON.parse(localStorage.getItem('stories')||'[]')
+let stories=JSON.parse(localStorage.vaz_stories||"[]");
 
-/* Fake Stories */
 const fakeStories=[
-{
-user:'NHL',
-type:'image',
-media:'mcdavid.png',
-text:'Connor McDavid scores 2 goals vs Flames'
-},
-{
-user:'NHL',
-type:'gif',
-media:'leafs.gif',
-text:'Maple Leafs win overtime vs Bruins'
-},
-{
-user:'NHL',
-type:'gif',
-media:'rangers.gif',
-text:'Rangers celebrate playoff spot at MSG'
-}
-]
+  {
+    user:"NHL",
+    src:"mcdavid.png",
+    type:"image",
+    text:"Connor McDavid scores 2 goals vs Flames"
+  },
+  {
+    user:"NHL",
+    src:"leafs.gif",
+    type:"image",
+    text:"Maple Leafs win overtime vs Bruins"
+  },
+  {
+    user:"NHL",
+    src:"rangers.gif",
+    type:"image",
+    text:"Rangers celebrate playoff spot at MSG"
+  }
+];
 
-function loadStories(){
-let box=document.getElementById('stories')
-box.innerHTML=''
+function loadFakeStories(){
+  if(!localStorage.vaz_fake_loaded){
+    fakeStories.forEach(s=>{
+      stories.unshift({
+        ...s,
+        id:Date.now()+Math.random(),
+        time:Date.now(),
+        fake:true
+      });
+    });
 
-let now=Date.now()
-stories=stories.filter(s=>now-s.time<86400000)
-localStorage.setItem('stories',JSON.stringify(stories))
-
-fakeStories.forEach(addStoryUI)
-stories.forEach(addStoryUI)
-}
-
-function addStoryUI(s){
-let d=document.createElement('div')
-d.className='story'
-
-let m
-if(s.type==='video'){
-m=document.createElement('video')
-m.src=s.media;m.autoplay=true;m.loop=true
-}else{
-m=document.createElement('img')
-m.src=s.media
+    localStorage.vaz_fake_loaded="1";
+    saveStories();
+  }
 }
 
-d.appendChild(m)
-d.innerHTML+=`<div>${s.user}</div>`
-d.onclick=()=>viewStory(s)
+loadFakeStories();
 
-document.getElementById('stories').appendChild(d)
+function uploadStory(e){
+  const f=e.target.files[0];
+  if(!f)return;
+
+  const caption=prompt("Caption:")||"My story";
+  const type=f.type.startsWith("video")?"video":"image";
+
+  const r=new FileReader();
+  r.onload=()=>{
+    stories.unshift({
+      id:Date.now(),
+      user:localStorage.vaz_user||"Guest",
+      src:r.result,
+      mediaType:type,
+      text:caption,
+      time:Date.now()
+    });
+    saveStories();
+    renderStories();
+  };
+
+  r.readAsDataURL(f);
 }
 
-function viewStory(s){
-alert(s.user+"\n"+s.text)
+function saveStories(){
+  localStorage.vaz_stories=JSON.stringify(stories);
 }
 
-function addStory(){
-let f=document.getElementById('storyFile').files[0]
-if(!f)return
-
-let r=new FileReader()
-r.onload=()=>{
-stories.push({
-user:profile.name||'You',
-type:f.type.startsWith('video')?'video':'image',
-media:r.result,
-text:'My story',
-time:Date.now()
-})
-localStorage.setItem('stories',JSON.stringify(stories))
-loadStories()
-}
-r.readAsDataURL(f)
+function cleanOldStories(){
+  const day=86400000;
+  stories=stories.filter(s=>Date.now()-s.time<day);
+  saveStories();
 }
 
-/* Feed */
-function loadFeed(){
-let f=document.getElementById('feed')
-f.innerHTML=''
+setInterval(cleanOldStories,60000);
 
-fakeStories.forEach(p=>addPost(p))
-stories.forEach(p=>addPost(p))
-}
+function renderStories(){
+  storiesFeed.innerHTML="";
 
-function addPost(p){
-let d=document.createElement('div')
-d.className='post'
+  stories.forEach(s=>{
+    const d=document.createElement("div");
+    d.className="story-box border p-3 rounded";
 
-let media
-if(p.type==='video'){
-media=`<video src="${p.media}" controls></video>`
-}else{
-media=`<img src="${p.media}">`
-}
+    let media="";
 
-d.innerHTML=`
-<b>${p.user}</b><br>
-${media}
-<p>${p.text}</p>
-`
+    if(s.type==="image"||s.mediaType==="image"){
+      media=`<img src='${s.src}' class='story-media'>`;
+    }
+    else if(s.mediaType==="video"){
+      media=`<video src='${s.src}' class='story-media' autoplay loop muted controls></video>`;
+    }
 
-feed.appendChild(d)
-}
+    d.innerHTML=`
+      <b class='mb-1'>${s.user}</b>
+      ${media}
+      <p class='mt-2 text-sm'>${s.text}</p>
+    `;
 
-/* Chat */
-function sendMsg(){
-let t=chatInput.value
-if(!t)return
-
-addChat('user',t)
-chatInput.value=''
-
-setTimeout(()=>{
-let r=aiReply(t)
-addChat('ai',r)
-},600)
-}
-
-function addChat(type,text){
-let d=document.createElement('div')
-d.className='msg '+type
-d.innerHTML=`<b>${type}:</b> ${text}`
-chatBox.appendChild(d)
-chatBox.scrollTop=9999
-}
-
-function aiReply(q){
-q=q.toLowerCase()
-
-if(q.includes('hello'))return'Hey! What’s up?'
-if(q.includes('sports'))return'I love hockey. Did you see McDavid last night?'
-if(q.includes('help'))return'I’m here. Ask me anything.'
-if(q.includes('name'))return'I’m vazAI.'
-
-return"Interesting. Tell me more about that.";
+    storiesFeed.appendChild(d);
+  });
 }
 
 /* Init */
-loadStories()
-loadFeed()
-
-/* Service Worker */
-if('serviceWorker'in navigator){
-navigator.serviceWorker.register('sw.js')
+function init(){
+  if(localStorage.vaz_dark==="true")body.classList.add("dark");
+  loadProfile();
+  addMsg("Hi! I'm vazAI 🤖","a");
 }
-</script>
 
+init();
+</script>
 </body>
 </html>
