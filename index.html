@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAZapp</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- PWA Manifest -->
 <link rel="manifest" id="manifestPlaceholder">
 <meta name="theme-color" content="#2563eb">
 
@@ -14,25 +12,14 @@
 body{font-family:Arial,sans-serif;transition:.3s}
 .dark{background:#111827;color:#fff}
 .dark .bg-white{background:#1f2933!important;color:#fff}
-
 @keyframes auraGlow{
 0%,100%{text-shadow:0 0 5px #0ff,0 0 15px #0ff}
 50%{text-shadow:0 0 25px #0ff,0 0 40px #0ff}
 }
-
 .logo-animation{
-position:fixed;
-inset:0;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#000;
-z-index:9999;
-font-size:3rem;
-font-weight:bold;
-transition:opacity 1s ease;
+position:fixed;inset:0;display:flex;justify-content:center;align-items:center;
+background:#000;z-index:9999;font-size:3rem;font-weight:bold;transition:opacity 1s ease;
 }
-
 .logo-animation .highlight{color:#0ff;animation:auraGlow 1.5s infinite}
 .logo-animation .app{color:#fff;font-weight:900}
 </style>
@@ -75,10 +62,6 @@ transition:opacity 1s ease;
 <div id="storiesPage" class="hidden bg-white w-full max-w-2xl p-4 rounded shadow">
 <h2 class="text-xl font-bold mb-2">📸 Stories</h2>
 <input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="mb-3">
-<div id="trendingFeed" class="mb-4">
-<h3 class="font-bold text-lg mb-2">🔥 Trending</h3>
-<div id="trendingStories" class="space-y-4"></div>
-</div>
 <div id="storiesFeed" class="space-y-4"></div>
 </div>
 
@@ -92,17 +75,15 @@ transition:opacity 1s ease;
 </div>
 
 </main>
-
 <footer class="bg-gray-200 p-2 text-center text-sm">©2026 VAZapp</footer>
 
 <script>
-
 /* ================= SPLASH ================= */
 window.addEventListener("load",()=>{
   const logo=document.getElementById("logoAnimation");
   setTimeout(()=>{
     logo.style.opacity="0";
-    setTimeout(()=>{logo.remove()},1200);
+    setTimeout(()=>logo.remove(),1200);
   },1500);
 });
 
@@ -120,20 +101,17 @@ const manifest={
     {src:"https://via.placeholder.com/512",sizes:"512x512",type:"image/png"}
   ]
 };
-const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
-document.getElementById("manifestPlaceholder").href=URL.createObjectURL(blob);
+document.getElementById("manifestPlaceholder").href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:"application/json"}));
 
 if("serviceWorker" in navigator){
   const swCode=`
-  self.addEventListener('install',e=>{
-    e.waitUntil(caches.open('vazapp').then(c=>c.addAll(['./'])))
-  });
-  self.addEventListener('fetch',e=>{
-    e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
-  });`;
-  const swBlob=new Blob([swCode],{type:"text/javascript"});
-  const swURL=URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swURL);
+    self.addEventListener('install',e=>{
+      e.waitUntil(caches.open('vazapp').then(c=>c.addAll(['./'])));
+    });
+    self.addEventListener('fetch',e=>{
+      e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));
+    });`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:"text/javascript"})));
 }
 
 /* ================= NAV ================= */
@@ -141,7 +119,7 @@ const chatPage=document.getElementById("chatPage");
 const storiesPage=document.getElementById("storiesPage");
 const profilePage=document.getElementById("profilePage");
 function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.add("hidden");profilePage.classList.add("hidden");}
-function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories();renderTrending();}
+function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories();}
 function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden");}
 
 /* ================= DARK ================= */
@@ -166,14 +144,12 @@ let follows=JSON.parse(localStorage.vaz_follows||"[]");
 
 const fakeUsers=[
   {user:"NHL",posts:[
-    {text:"Maple Leafs celebrate big home win 🏒",src:"https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Packed arena for playoff showdown",src:"https://images.unsplash.com/photo-1505842465776-3a8f84b0c84a?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Overtime goal sends fans wild",src:"https://images.unsplash.com/photo-1547347298-4074fc3086f0?auto=format&fit=crop&w=900&q=80",type:"image"}
+    {text:"Maple Leafs celebrate win 🏒",src:"https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Packed arena for playoffs",src:"https://images.unsplash.com/photo-1505842465776-3a8f84b0c84a?auto=format&fit=crop&w=900&q=80",type:"image"}
   ]},
   {user:"NBC-News",posts:[
-    {text:"Severe storm floods coastal town",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Leaders meet for emergency summit",src:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Fire crews battle massive blaze",src:"https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",type:"image"}
+    {text:"Severe storm hits coast",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Emergency summit today",src:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",type:"image"}
   ]}
 ];
 
@@ -199,16 +175,16 @@ function uploadStory(e){
   const r=new FileReader();
   r.onload=()=>{
     stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",src:r.result,mediaType:type,text:caption,fake:false});
-    saveStories();renderStories();renderTrending();
+    saveStories();renderStories();
   };
   r.readAsDataURL(f);
 }
 
 function saveStories(){localStorage.vaz_stories=JSON.stringify(stories);localStorage.vaz_likes=JSON.stringify(likes);localStorage.vaz_comments=JSON.stringify(comments);localStorage.vaz_follows=JSON.stringify(follows);}
-function toggleFollow(u){follows.includes(u)?follows=follows.filter(x=>x!==u):follows.push(u);saveStories();renderStories();renderTrending();}
-function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories();renderTrending();}
-function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories();renderTrending();}
-function deleteStory(i){if(!confirm("Delete this story?"))return;stories.splice(i,1);saveStories();renderStories();renderTrending();}
+function toggleFollow(u){follows.includes(u)?follows=follows.filter(x=>x!==u):follows.push(u);saveStories();renderStories();}
+function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories();}
+function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories();}
+function deleteStory(i){if(!confirm("Delete this story?"))return;stories.splice(i,1);saveStories();renderStories();}
 
 function renderStories(){
   storiesFeed.innerHTML="";
@@ -228,8 +204,7 @@ function renderStories(){
         <button onclick="toggleFollow('${s.user}')" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button>
         ${canDelete?`<button onclick="deleteStory(${index})" class='text-red-600'>🗑️</button>`:""}
       </div>
-    </div>
-    ${content}
+    </div>${content}
     <div class='flex gap-3 text-sm'>
       <button onclick="likeStory(${s.id})">❤️ ${likes[s.id]||0}</button>
       <button onclick="addComment(${s.id})">💬 ${comments[s.id]?comments[s.id].length:0}</button>
@@ -238,23 +213,8 @@ function renderStories(){
   });
 }
 
-function renderTrending(){
-  const trendingDiv=document.getElementById("trendingStories");
-  trendingDiv.innerHTML="";
-  const trendingStories = [...stories].sort((a,b)=>(likes[b.id]||0)-(likes[a.id]||0)).slice(0,5);
-  trendingStories.forEach(s=>{
-    const d=document.createElement("div");
-    d.className="border p-2 rounded bg-gray-100 dark:bg-gray-800";
-    let content="";
-    if(s.mediaType==="image"){content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;}
-    else if(s.mediaType==="video"){content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;}
-    d.innerHTML=`<b>${s.user}</b>${content}<p class='text-sm'>❤️ ${likes[s.id]||0} | 💬 ${comments[s.id]?comments[s.id].length:0}</p>`;
-    trendingDiv.appendChild(d);
-  });
-}
-
 /* ================= LOGIN ================= */
-function login(){let u = prompt("Choose a username:", localStorage.vaz_user||"");if(!u) return;localStorage.vaz_user = u;alert("Logged in as "+u);loadProfile();}
+function login(){let u = prompt("Choose a username:", localStorage.vaz_user||"");if(!u) return;localStorage.vaz_user = u;loadProfile();}
 if(!localStorage.vaz_user){setTimeout(login,500);}
 
 /* ================= INIT ================= */
@@ -262,12 +222,9 @@ function init(){
   if(localStorage.vaz_dark==="true")body.classList.add("dark");
   loadProfile();
   addMsg("Hi! I'm vazAI 🤖","a");
-  renderTrending();
-  // Auto-refresh every 5 seconds
-  setInterval(()=>{renderStories();renderTrending();},5000);
+  renderStories();
 }
 init();
-
 </script>
 </body>
 </html>
