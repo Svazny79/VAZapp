@@ -111,9 +111,11 @@ let follows=JSON.parse(localStorage.vaz_follows||"[]");
 // Fake News/Sports Users (24h rotation)
 const fakeUsers=[
   {user:"NHL",posts:[
-    "Overtime thriller as underdogs win late tonight 🏒",
-    "Star player scores hat trick in huge matchup",
-    "Playoff race heats up across the league"
+    "Maple Leafs dominate in 5-2 win over rivals 🏒",
+    "Oilers and Avalanche clash in playoff-style showdown",
+    "Rangers edge Bruins in intense overtime battle",
+    "Lightning extend winning streak with shutout victory",
+    "Golden Knights secure top spot in division"
   ]},
   {user:"NBC-News",posts:[
     "Breaking: Major storm impacts East Coast",
@@ -149,7 +151,24 @@ function generateFakeStories(){
 
 generateFakeStories();
 
-function uploadStory(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",vid:r.result});saveStories();renderStories()};r.readAsDataURL(f)}
+function uploadStory(e){
+  const f=e.target.files[0];
+  if(!f) return;
+  const caption=prompt("Add a caption for your story:")||"My new story";
+  const r=new FileReader();
+  r.onload=()=>{
+    stories.unshift({
+      id:Date.now(),
+      user:localStorage.vaz_user||"Guest",
+      vid:r.result,
+      text:caption,
+      fake:false
+    });
+    saveStories();
+    renderStories();
+  };
+  r.readAsDataURL(f);
+}
 
 function saveStories(){localStorage.vaz_stories=JSON.stringify(stories);localStorage.vaz_likes=JSON.stringify(likes);localStorage.vaz_comments=JSON.stringify(comments);localStorage.vaz_follows=JSON.stringify(follows)}
 
@@ -169,7 +188,7 @@ let content="";
 if(s.fake){
   content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;
 }else{
-  content=`<video src='${s.vid}' controls class='w-full rounded mb-1'></video>`;
+  content=`<video src='${s.vid}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
 }
 
 d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
