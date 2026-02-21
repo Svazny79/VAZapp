@@ -51,7 +51,7 @@ body{font-family:Arial,sans-serif;transition:.3s}
 <!-- Stories -->
 <div id="storiesPage" class="hidden bg-white w-full max-w-2xl p-4 rounded shadow">
 <h2 class="text-xl font-bold mb-2">📸 Stories</h2>
-<input type="file" accept="video/*" onchange="uploadStory(event)" class="mb-3">
+<input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="mb-3">
 <div id="storiesFeed" class="space-y-4"></div>
 </div>
 
@@ -154,15 +154,18 @@ generateFakeStories();
 function uploadStory(e){
   const f=e.target.files[0];
   if(!f) return;
-  const caption=prompt("Add a caption for your story:")||"My new story";
-  const r=new FileReader();
-  r.onload=()=>{
+  const caption = prompt("Add a caption for your story:") || "My new story";
+  const type = f.type.startsWith("image") ? "image" : "video";
+
+  const r = new FileReader();
+  r.onload = () => {
     stories.unshift({
-      id:Date.now(),
-      user:localStorage.vaz_user||"Guest",
-      vid:r.result,
-      text:caption,
-      fake:false
+      id: Date.now(),
+      user: localStorage.vaz_user || "Guest",
+      src: r.result,
+      mediaType: type,
+      text: caption,
+      fake: false
     });
     saveStories();
     renderStories();
@@ -186,9 +189,14 @@ const followed=follows.includes(s.user);
 
 let content="";
 if(s.fake){
-  content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;
+  content = `<p class='mb-2 italic'>📰 ${s.text}</p>`;
 }else{
-  content=`<video src='${s.vid}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
+  if(s.mediaType === "image"){
+    content = `<img src='${s.src}' class='w-full rounded mb-1' /><p class='mt-1 text-sm'>${s.text||""}</p>`;
+  }else{
+    content = `<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
+  }
+}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
 }
 
 d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b><button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button></div>
@@ -206,3 +214,4 @@ init();
 </script>
 </body>
 </html>
+
