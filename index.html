@@ -5,11 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAZapp</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
-<!-- PWA Manifest -->
 <link rel="manifest" id="manifestPlaceholder">
 <meta name="theme-color" content="#2563eb">
-
 <style>
 body{font-family:Arial,sans-serif;transition:.3s}
 .dark{background:#111827;color:#fff}
@@ -19,22 +16,13 @@ body{font-family:Arial,sans-serif;transition:.3s}
 50%{text-shadow:0 0 25px #0ff,0 0 40px #0ff}
 }
 .logo-animation{
-position:fixed;
-inset:0;
-display:flex;
-justify-content:center;
-align-items:center;
-background:#000;
-z-index:9999;
-font-size:3rem;
-font-weight:bold;
-transition:opacity 1s ease;
+position:fixed; inset:0; display:flex; justify-content:center; align-items:center; background:#000;
+z-index:9999; font-size:3rem; font-weight:bold; transition:opacity 1s ease;
 }
 .logo-animation .highlight{color:#0ff;animation:auraGlow 1.5s infinite}
 .logo-animation .app{color:#fff;font-weight:900}
 </style>
 </head>
-
 <body id="body" class="bg-gray-100 min-h-screen flex flex-col">
 
 <!-- Splash -->
@@ -55,7 +43,7 @@ transition:opacity 1s ease;
 
 <main class="flex-1 p-4 flex justify-center items-start">
 
-<!-- Chat -->
+<!-- Chat Page -->
 <div id="chatPage" class="bg-white w-full max-w-xl p-4 rounded shadow flex flex-col">
 <div class="flex items-center gap-2 mb-2">
 <img id="chatAvatar" class="w-8 h-8 rounded-full" src="https://via.placeholder.com/40">
@@ -68,14 +56,14 @@ transition:opacity 1s ease;
 </div>
 </div>
 
-<!-- Stories -->
+<!-- Stories Page -->
 <div id="storiesPage" class="hidden bg-white w-full max-w-2xl p-4 rounded shadow">
 <h2 class="text-xl font-bold mb-2">📸 Stories</h2>
 <input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="mb-3">
 <div id="storiesFeed" class="space-y-4"></div>
 </div>
 
-<!-- Profile -->
+<!-- Profile Page -->
 <div id="profilePage" class="hidden bg-white w-full max-w-md p-4 rounded shadow">
 <h2 class="text-xl font-bold mb-3">Profile</h2>
 <img id="profilePreview" class="w-24 h-24 rounded-full mx-auto mb-2" src="https://via.placeholder.com/120">
@@ -89,28 +77,28 @@ transition:opacity 1s ease;
 <footer class="bg-gray-200 p-2 text-center text-sm">©2026 VAZapp</footer>
 
 <script>
-/* SPLASH */
+// ===== SPLASH =====
 window.addEventListener("load",()=>{
   const logo=document.getElementById("logoAnimation");
   setTimeout(()=>{logo.style.opacity="0"; setTimeout(()=>logo.remove(),1200);},1500);
 });
 
-/* PWA */
-const manifest={name:"VAZapp",short_name:"VAZapp",start_url:".",display:"standalone",
+// ===== PWA =====
+const manifest={
+name:"VAZapp",short_name:"VAZapp",start_url:".",display:"standalone",
 background_color:"#000000",theme_color:"#2563eb",description:"VAZapp with vazAI and Stories",
 icons:[
 {src:"https://via.placeholder.com/192",sizes:"192x192",type:"image/png"},
-{src:"https://via.placeholder.com/512",sizes:"512x512",type:"image/png"}
-]};
+{src:"https://via.placeholder.com/512",sizes:"512x512",type:"image/png"}]};
 document.getElementById("manifestPlaceholder").href=URL.createObjectURL(new Blob([JSON.stringify(manifest)],{type:"application/json"}));
 
 if("serviceWorker" in navigator){
-  const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('vazapp').then(c=>c.addAll(['./'])))});
-  self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));})`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:"text/javascript"})));
+const swCode=`self.addEventListener('install',e=>{e.waitUntil(caches.open('vazapp').then(c=>c.addAll(['./'])))});
+self.addEventListener('fetch',e=>{e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)));})`;
+navigator.serviceWorker.register(URL.createObjectURL(new Blob([swCode],{type:"text/javascript"})));
 }
 
-/* NAVIGATION */
+// ===== NAV =====
 const chatPage=document.getElementById("chatPage");
 const storiesPage=document.getElementById("storiesPage");
 const profilePage=document.getElementById("profilePage");
@@ -118,73 +106,46 @@ function showChat(){chatPage.classList.remove("hidden");storiesPage.classList.ad
 function showStories(){storiesPage.classList.remove("hidden");chatPage.classList.add("hidden");profilePage.classList.add("hidden");renderStories();}
 function showProfile(){profilePage.classList.remove("hidden");chatPage.classList.add("hidden");storiesPage.classList.add("hidden");}
 
-/* DARK MODE */
+// ===== DARK =====
 function toggleDark(){body.classList.toggle("dark");localStorage.vaz_dark=body.classList.contains("dark");}
 
-/* PROFILE */
+// ===== PROFILE =====
 function loadImage(e){const r=new FileReader();r.onload=()=>profilePreview.src=r.result;r.readAsDataURL(e.target.files[0]);}
 function saveProfile(){localStorage.vaz_user=usernameInput.value||"Guest";localStorage.vaz_avatar=profilePreview.src;loadProfile();showChat();}
 function loadProfile(){chatName.textContent=localStorage.vaz_user||"Guest";usernameInput.value=localStorage.vaz_user||"";if(localStorage.vaz_avatar){chatAvatar.src=localStorage.vaz_avatar;profilePreview.src=localStorage.vaz_avatar;}}
 
-/* CHAT */
+// ===== CHAT =====
 function addMsg(t,s){const d=document.createElement("div");d.className=s==="u"?"text-right text-blue-500":"text-left text-green-500";d.textContent=(s==="u"?"You: ":"vazAI: ")+t;chat.appendChild(d);chat.scrollTop=chat.scrollHeight;}
 function sendMessage(){const t=userInput.value.trim();if(!t)return;addMsg(t,"u");userInput.value="";setTimeout(()=>addMsg(ai(t),"a"),600);}
 userInput.onkeydown=e=>{if(e.key==="Enter")sendMessage();}
+function ai(m){m=m.toLowerCase();if(/\d+[+\-*/]\d+/.test(m))return "Answer: "+eval(m);
+if(m.includes("weather"))return "Check your local forecast online.";
+if(m.includes("code"))return "Tell me what you're building.";
+if(m.includes("sad")||m.includes("stress"))return "I'm here for you 💙";
+if(m.startsWith("how"))return "Let's break it down step by step.";
+if(m.startsWith("what")||m.startsWith("who"))return "Good question!";
+return "Tell me more so I can help.";}
 
-function ai(m){
-  m=m.toLowerCase();
-  if(/\d+[+\-*/]\d+/.test(m))return "Answer: "+eval(m);
-  if(m.includes("weather"))return "Check your local forecast online.";
-  if(m.includes("code"))return "Tell me what you're building.";
-  if(m.includes("sad")||m.includes("stress"))return "I'm here for you 💙";
-  if(m.startsWith("how"))return "Let's break it down step by step.";
-  if(m.startsWith("what")||m.startsWith("who"))return "Good question!";
-  return "Tell me more so I can help.";
-}
+// ===== STORIES =====
+let stories=[],likes={},comments={},follows=[];
 
-/* STORIES */
-let stories=[];
-let likes={};
-let comments={};
-let follows=[];
-
-/* FAKE USERS WITH IMAGES + VIDEOS */
+// Fake users with realistic image/video posts
 const fakeUsers=[
-  {user:"NHL",posts:[
-    {text:"Toronto Maple Leafs edge Boston Bruins 4–3 in overtime at Scotiabank Arena 🏒",src:"https://images.unsplash.com/photo-1624370710105-f01d5e2e39e6?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Highlights from Edmonton Oilers vs Calgary Flames match",src:"https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4",type:"video"},
-    {text:"Rangers secure playoff spot in Madison Square Garden",src:"https://images.unsplash.com/photo-1619777862065-6e0b1c8c1aa4?auto=format&fit=crop&w=900&q=80",type:"image"}
-  ]},
-  {user:"NBC-News",posts:[
-    {text:"Flash flooding in Miami after heavy rain",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Climate summit in Geneva with world leaders",src:"https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4",type:"video"},
-    {text:"Stock market reacts to new tech regulations",src:"https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=900&q=80",type:"image"}
-  ]}
-];
+{user:"NHL",posts:[
+{text:"Toronto Maple Leafs score last-minute goal vs Boston Bruins in Scotiabank Arena 🏒",src:"https://images.unsplash.com/photo-1624370710105-f01d5e2e39e6?auto=format&fit=crop&w=900&q=80",type:"image"},
+{text:"Edmonton Oilers vs Calgary Flames highlights",src:"https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_5mb.mp4",type:"video"},
+{text:"Rangers celebrate playoff spot in Madison Square Garden",src:"https://images.unsplash.com/photo-1619777862065-6e0b1c8c1aa4?auto=format&fit=crop&w=900&q=80",type:"image"}]},
+{user:"NBC-News",posts:[
+{text:"Flash flooding after heavy rains in Miami",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
+{text:"Climate summit in Geneva with world leaders",src:"https://sample-videos.com/video123/mp4/480/big_buck_bunny_480p_5mb.mp4",type:"video"},
+{text:"Stock markets react to tech regulations",src:"https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=900&q=80",type:"image"}]}];
 
-function generateFakeStories(){
-  stories = [];
-  fakeUsers.forEach(f=>{
-    f.posts.forEach(p=>{
-      stories.push({id:Date.now()+Math.random(),user:f.user,src:p.src,mediaType:p.type,text:p.text,fake:true});
-    });
-  });
-  saveStories();
-}
+function generateFakeStories(){stories=[];fakeUsers.forEach(f=>{f.posts.forEach(p=>{stories.push({id:Date.now()+Math.random(),user:f.user,src:p.src,mediaType:p.type,text:p.text,fake:true});});});saveStories();}
 generateFakeStories();
 
-/* USER STORY UPLOAD */
-function uploadStory(e){
-  const f=e.target.files[0];if(!f)return;
-  const caption=prompt("Caption:")||"My story";
-  const type=f.type.startsWith("image")?"image":"video";
-  const r=new FileReader();
-  r.onload=()=>{
-    stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",src:r.result,mediaType:type,text:caption,fake:false});
-    saveStories();
-    renderStories();
-  };
-  r.readAsDataURL(f);
+function uploadStory(e){const f=e.target.files[0];if(!f)return;const caption=prompt("Caption:")||"My story";const type=f.type.startsWith("image")?"image":"video";const r=new FileReader();
+r.onload=()=>{stories.unshift({id:Date.now(),user:localStorage.vaz_user||"Guest",src:r.result,mediaType:type,text:caption,fake:false});saveStories();renderStories();};
+r.readAsDataURL(f);
 }
 
 function saveStories(){localStorage.vaz_stories=JSON.stringify(stories);localStorage.vaz_likes=JSON.stringify(likes);localStorage.vaz_comments=JSON.stringify(comments);localStorage.vaz_follows=JSON.stringify(follows);}
@@ -193,33 +154,24 @@ function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories();
 function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories();}
 function deleteStory(i){if(!confirm("Delete this story?"))return;stories.splice(i,1);saveStories();renderStories();}
 
-/* RENDER STORIES */
-function renderStories(){
-  storiesFeed.innerHTML="";
-  stories.forEach((s,index)=>{
-    const d=document.createElement("div");d.className="border p-3 rounded";
-    const followed=follows.includes(s.user);
-    let content="";
-    if(s.mediaType==="image"){content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;}
-    else if(s.mediaType==="video"){content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;}
-    else{content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;}
-    const canDelete = s.user === (localStorage.vaz_user || "Guest");
-    d.innerHTML=`<div class='flex justify-between mb-1'>
-      <b>${s.user}</b>
-      <div class='flex gap-2'>
-        ${s.fake ? "" : `<button onclick="toggleFollow('${s.user}')" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button>`}
-        ${canDelete?`<button onclick="deleteStory(${index})" class='text-red-600'>🗑️</button>`:""}
-      </div>
-    </div>${content}
-    <div class='flex gap-3 text-sm'>
-      <button onclick="likeStory(${s.id})">❤️ ${likes[s.id]||0}</button>
-      <button onclick="addComment(${s.id})">💬 ${comments[s.id]?comments[s.id].length:0}</button>
-    </div>`;
-    storiesFeed.appendChild(d);
-  });
+function renderStories(){storiesFeed.innerHTML="";
+stories.forEach((s,index)=>{
+const d=document.createElement("div");d.className="border p-3 rounded";
+const followed=follows.includes(s.user);
+let content="";
+if(s.mediaType==="image"){content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;}
+else if(s.mediaType==="video"){content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;}
+else{content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;}
+const canDelete = s.user === (localStorage.vaz_user || "Guest");
+d.innerHTML=`<div class='flex justify-between mb-1'><b>${s.user}</b>
+<div class='flex gap-2'>${!s.fake?`<button onclick="toggleFollow('${s.user}')" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button>`:""}${canDelete?`<button onclick="deleteStory(${index})" class='text-red-600'>🗑️</button>`:""}</div></div>${content}
+<div class='flex gap-3 text-sm'>
+<button onclick="likeStory(${s.id})">❤️ ${likes[s.id]||0}</button>
+<button onclick="addComment(${s.id})">💬 ${comments[s.id]?comments[s.id].length:0}</button>
+</div>`;storiesFeed.appendChild(d);});
 }
 
-/* INIT */
+// ===== INIT =====
 if(!localStorage.vaz_user){setTimeout(()=>{let u=prompt("Choose a username:","Guest");if(u)localStorage.vaz_user=u;loadProfile();alert("Logged in as "+u);},500);}
 function init(){if(localStorage.vaz_dark==="true")body.classList.add("dark");loadProfile();addMsg("Hi! I'm vazAI 🤖","a");renderStories();}
 init();
