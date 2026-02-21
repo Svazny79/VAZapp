@@ -117,26 +117,61 @@
 
     // Smarter AI responses
     function getAIResponse(msg){
-      msg=msg.toLowerCase();
-      if(msg.includes("hello")||msg.includes("hi"))return"Hey! I'm vazAI 😎 How are you today?";
-      if(msg.includes("how are you"))return"I'm fantastic! Ready to chat and help you 😄";
-      if(msg.includes("name")||msg.includes("who are you"))return"I'm vazAI, your smart assistant inside VAZapp 🤖";
-      if(msg.includes("help"))return"Sure! What can I help you with today?";
-      if(msg.includes("code"))return"I can guide you through coding, building websites, or apps.";
-      if(msg.includes("website"))return"VAZapp is evolving! Need suggestions or new features?";
-      if(msg.includes("school")||msg.includes("homework"))return"Let's tackle your school work together! What subject?";
-      if(msg.includes("math"))return"Send me the math problem and I'll solve it step by step.";
-      if(msg.includes("bored"))return"We can chat, learn something cool, or brainstorm ideas together 😎";
-      if(msg.includes("thank"))return"You're welcome! 😊";
-      // Dynamic smart fallback responses
-      const smart=[
-        "That sounds interesting! Can you explain more?",
-        "Why do you think that?",
-        "I see! Tell me more details.",
-        "What would you like to do next?",
-        "Hmm, fascinating!"
-      ];
-      return smart[Math.floor(Math.random()*smart.length)];
+      const original = msg;
+      msg = msg.toLowerCase();
+
+      // Math
+      if(/\d+\s*[+\-*/]\s*\d+/.test(msg)){
+        try{
+          const result = eval(msg);
+          return `The answer is ${result}. Want me to explain how?`;
+        }catch{
+          return "That looks like a math problem. Can you rewrite it clearly?";
+        }
+      }
+
+      // Definitions
+      if(msg.startsWith("what is") || msg.startsWith("who is") || msg.startsWith("define")){
+        return "Good question! Let me explain: " + original.replace(/^(what is|who is|define)/i, "").trim() + " is something I can help you understand. Can you be more specific?";
+      }
+
+      // How-to
+      if(msg.startsWith("how to") || msg.includes("how do i")){
+        return "Let’s break it down step by step. First, tell me what part you’re stuck on.";
+      }
+
+      // Coding
+      if(msg.includes("code") || msg.includes("html") || msg.includes("css") || msg.includes("javascript")){
+        return "Nice! Tell me what you're building and I’ll help you write the code.";
+      }
+
+      // Feelings
+      if(msg.includes("sad") || msg.includes("angry") || msg.includes("stressed")){
+        return "I’m here for you. Want to talk about what’s going on?";
+      }
+
+      // Greetings
+      if(msg.includes("hello") || msg.includes("hi") || msg.includes("hey")){
+        return "Hey! 😊 What would you like to talk about today?";
+      }
+
+      // School
+      if(msg.includes("homework") || msg.includes("school") || msg.includes("test")){
+        return "Tell me the question and I’ll help you solve it step by step.";
+      }
+
+      // Technology
+      if(msg.includes("computer") || msg.includes("app") || msg.includes("website")){
+        return "Cool! Are you trying to build, fix, or improve something?";
+      }
+
+      // Why questions
+      if(msg.startsWith("why")){
+        return "That’s a thoughtful question. Let’s think it through together. What made you ask?";
+      }
+
+      // Default intelligent fallback
+      return "That’s interesting. Can you give me a bit more detail so I can help better?";
     }
 
     // Load settings
