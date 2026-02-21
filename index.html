@@ -148,21 +148,20 @@ let likes={};
 let comments={};
 let follows=[];
 
-/* FAKE USERS WITH MATCHING IMAGES */
+/* FAKE USERS WITH IMAGES + VIDEOS */
 const fakeUsers=[
   {user:"NHL",posts:[
     {text:"Toronto Maple Leafs edge Boston Bruins 4–3 in overtime at Scotiabank Arena 🏒",src:"https://images.unsplash.com/photo-1624370710105-f01d5e2e39e6?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Connor McDavid scores 2 goals as Edmonton Oilers defeat Calgary Flames in packed Rogers Place",src:"https://images.unsplash.com/photo-1624370808522-832af5f3dc7f?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Rangers secure playoff spot in sold-out Madison Square Garden",src:"https://images.unsplash.com/photo-1619777862065-6e0b1c8c1aa4?auto=format&fit=crop&w=900&q=80",type:"image"}
+    {text:"Highlights from Edmonton Oilers vs Calgary Flames match",src:"https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4",type:"video"},
+    {text:"Rangers secure playoff spot in Madison Square Garden",src:"https://images.unsplash.com/photo-1619777862065-6e0b1c8c1aa4?auto=format&fit=crop&w=900&q=80",type:"image"}
   ]},
   {user:"NBC-News",posts:[
-    {text:"Flash flooding in Miami after overnight heavy rain, officials warn residents to stay indoors",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Emergency climate summit begins in Geneva with world leaders",src:"https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=900&q=80",type:"image"},
-    {text:"Stock markets drop following new tech regulations announced in Washington",src:"https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=900&q=80",type:"image"}
+    {text:"Flash flooding in Miami after heavy rain",src:"https://images.unsplash.com/photo-1501594907352-04cda38ebc29?auto=format&fit=crop&w=900&q=80",type:"image"},
+    {text:"Climate summit in Geneva with world leaders",src:"https://sample-videos.com/video123/mp4/240/big_buck_bunny_240p_1mb.mp4",type:"video"},
+    {text:"Stock market reacts to new tech regulations",src:"https://images.unsplash.com/photo-1554224154-22dec7ec8818?auto=format&fit=crop&w=900&q=80",type:"image"}
   ]}
 ];
 
-/* RESET STORIES */
 function generateFakeStories(){
   stories = [];
   fakeUsers.forEach(f=>{
@@ -194,7 +193,7 @@ function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories();
 function addComment(id){const t=prompt("Comment:");if(!t)return;comments[id]=comments[id]||[];comments[id].push(t);saveStories();renderStories();}
 function deleteStory(i){if(!confirm("Delete this story?"))return;stories.splice(i,1);saveStories();renderStories();}
 
-/* RENDER ALL STORIES */
+/* RENDER STORIES */
 function renderStories(){
   storiesFeed.innerHTML="";
   stories.forEach((s,index)=>{
