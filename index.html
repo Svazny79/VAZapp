@@ -311,29 +311,34 @@ function addComment(id){
 
 function renderStories(){
   storiesFeed.innerHTML="";
-
-  stories.forEach(s=>{
+  stories.forEach((s,index)=>{
     if(follows.length&&!follows.includes(s.user)&&s.user!==(localStorage.vaz_user||"Guest"))return;
 
     const d=document.createElement("div");
     d.className="border p-3 rounded";
-
     const followed=follows.includes(s.user);
+
     let content="";
 
     if(s.mediaType==="image"){
-      content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='text-sm'>${s.text}</p>`;
+      content=`<img src='${s.src}' class='w-full rounded mb-1'/><p class='mt-1 text-sm'>${s.text||""}</p>`;
+    }else if(s.mediaType==="video"){
+      content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='mt-1 text-sm'>${s.text||""}</p>`;
     }else{
-      content=`<video src='${s.src}' controls class='w-full rounded mb-1'></video><p class='text-sm'>${s.text}</p>`;
+      content=`<p class='mb-2 italic'>📰 ${s.text}</p>`;
     }
 
-    d.innerHTML=`
-    <div class='flex justify-between mb-1'>
+    const canDelete = s.user === (localStorage.vaz_user || "Guest");
+
+    d.innerHTML=`<div class='flex justify-between mb-1'>
       <b>${s.user}</b>
-      <button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button>
+      <div class='flex gap-2'>
+        <button onclick=\"toggleFollow('${s.user}')\" class='text-blue-600'>${followed?"Unfollow":"Follow"}</button>
+        ${canDelete?`<button onclick=\"deleteStory(${index})\" class='text-red-600'>🗑️</button>`:""}
+      </div>
     </div>
     ${content}
-    <div class='flex gap-3 text-sm mt-1'>
+    <div class='flex gap-3 text-sm'>
       <button onclick=\"likeStory(${s.id})\">❤️ ${likes[s.id]||0}</button>
       <button onclick=\"addComment(${s.id})\">💬 ${comments[s.id]?comments[s.id].length:0}</button>
     </div>`;
@@ -342,7 +347,28 @@ function renderStories(){
   });
 }
 
+function deleteStory(i){
+  if(!confirm("Delete this story?"))return;
+  stories.splice(i,1);
+  saveStories();
+  renderStories();
+}
+
 /* ================= INIT ================= */
+
+// Simple Login System
+function login(){
+  let u = prompt("Choose a username:", localStorage.vaz_user||"");
+  if(!u) return;
+  localStorage.vaz_user = u;
+  alert("Logged in as "+u);
+  loadProfile();
+}
+
+// Auto-login if not set
+if(!localStorage.vaz_user){
+  setTimeout(login,500);
+}
 
 function init(){
   if(localStorage.vaz_dark==="true")body.classList.add("dark");
