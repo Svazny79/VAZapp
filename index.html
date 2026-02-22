@@ -47,18 +47,42 @@ padding:0;
 
 .story{
 height:85vh;
+width:100%;
 scroll-snap-align:start;
 display:flex;
 flex-direction:column;
 justify-content:center;
 align-items:center;
-border:none;
+position:relative;
 }
 
 .story img,.story video{
 max-height:70vh;
-width:auto;
+max-width:95%;
+object-fit:contain;
 border-radius:12px;
+background:black;
+}
+
+.story-overlay{
+position:absolute;
+left:0;
+right:0;
+bottom:0;
+padding:15px;
+background:linear-gradient(transparent,rgba(0,0,0,0.8));
+color:white;
+}
+
+.story-user{
+position:absolute;
+top:10px;
+left:10px;
+color:white;
+font-weight:bold;
+background:rgba(0,0,0,0.5);
+padding:4px 8px;
+border-radius:8px;
 }
 </style>
 </head>
@@ -96,8 +120,8 @@ border-radius:12px;
 </div>
 
 <!-- STORIES -->
-<div id="storiesPage" class="hidden w-full">
-<input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="m-2">
+<div id="storiesPage" class="hidden w-full bg-black">
+<input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="m-2 text-white">
 <div id="storiesFeed"></div>
 </div>
 
@@ -125,7 +149,7 @@ setTimeout(()=>logoAnimation.remove(),1200);
 }
 
 /* NAV */
-const chatPage=chatPageEl=document.getElementById("chatPage");
+const chatPage=document.getElementById("chatPage");
 const storiesPage=document.getElementById("storiesPage");
 const profilePage=document.getElementById("profilePage");
 
@@ -157,9 +181,8 @@ return "Tell me more."}
 /* STORIES DATA */
 let stories=JSON.parse(localStorage.vaz_stories||"[]");
 let likes=JSON.parse(localStorage.vaz_likes||"{}");
-let follows=JSON.parse(localStorage.vaz_follows||"[]");
 
-/* NHL + NEWS FAKE POSTS */
+/* FIXED NHL + NEWS POSTS */
 const fakeStories=[
 {
 user:"NHL",
@@ -175,13 +198,13 @@ type:"image"
 },
 {
 user:"NHL",
-text:"Rangers clinch playoff spot at MSG",
+text:"Rangers celebrate playoff spot at MSG",
 src:"rangers.gif",
 type:"image"
 },
 {
 user:"NBC-News",
-text:"Massive storm floods Miami streets",
+text:"Breaking: Flash flooding hits downtown Miami",
 src:"news.gif",
 type:"image"
 }
@@ -189,8 +212,10 @@ type:"image"
 
 function loadFakeStories(){
 if(!localStorage.vaz_fake_loaded){
+const ordered=[];
+
 fakeStories.forEach(s=>{
-stories.unshift({
+ordered.push({
 id:Date.now()+Math.random(),
 user:s.user,
 src:s.src,
@@ -199,6 +224,9 @@ text:s.text,
 fake:true
 });
 });
+
+stories = ordered.concat(stories);
+
 localStorage.vaz_fake_loaded="true";
 saveStories();
 }
@@ -235,12 +263,12 @@ r.readAsDataURL(f);
 function saveStories(){
 localStorage.vaz_stories=JSON.stringify(stories);
 localStorage.vaz_likes=JSON.stringify(likes);
-localStorage.vaz_follows=JSON.stringify(follows);
 }
 
 /* RENDER */
 function renderStories(){
 storiesFeed.innerHTML="";
+
 stories.forEach((s,i)=>{
 
 const d=document.createElement("div");
@@ -249,7 +277,7 @@ d.className="story";
 let media="";
 
 if(s.mediaType==="image"){
-media=`<img src='${s.src}'>`;
+media=`<img src='${s.src}' loading='lazy'>`;
 }else{
 media=`<video src='${s.src}' autoplay loop muted playsinline></video>`;
 }
@@ -258,12 +286,14 @@ const canDelete=s.user===(localStorage.vaz_user||"Guest");
 
 
 d.innerHTML=`
-<div class='absolute top-2 left-2 text-white font-bold'>${s.user}</div>
-<div class='absolute top-2 right-2 text-white text-sm'>${s.text}</div>
+<div class='story-user'>${s.user}</div>
 ${media}
-<div class='absolute bottom-4 flex gap-4 text-white'>
+<div class='story-overlay'>
+<p class='text-sm mb-2'>${s.text}</p>
+<div class='flex gap-4'>
 <button onclick='likeStory(${s.id})'>❤️ ${likes[s.id]||0}</button>
 ${canDelete?`<button onclick='deleteStory(${i})'>🗑</button>`:""}
+</div>
 </div>`;
 
 storiesFeed.appendChild(d);
@@ -274,13 +304,13 @@ function likeStory(id){likes[id]=(likes[id]||0)+1;saveStories();renderStories()}
 
 function deleteStory(i){if(!confirm("Delete story?"))return;stories.splice(i,1);saveStories();renderStories()}
 
-/* SWIPE SUPPORT */
+/* SWIPE */
 let startY=0;
 storiesFeed.addEventListener("touchstart",e=>{startY=e.touches[0].clientY});
 storiesFeed.addEventListener("touchend",e=>{
 const endY=e.changedTouches[0].clientY;
 const diff=startY-endY;
-if(Math.abs(diff)>50){
+if(Math.abs(diff)>60){
 storiesFeed.scrollBy({top:diff>0?window.innerHeight:-window.innerHeight,behavior:"smooth"});
 }
 });
