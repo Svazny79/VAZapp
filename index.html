@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>VAZapp</title>
 
-<!-- PWA -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2563eb">
 
@@ -19,13 +18,13 @@ transition:.3s;
 overflow:hidden;
 }
 
-/* Dark */
 .dark{
 background:#111827;
 color:white;
 }
 
 /* Splash */
+
 #splash{
 position:fixed;
 inset:0;
@@ -124,7 +123,7 @@ margin-bottom:10px;
 .story{
 border:1px solid #ddd;
 padding:10px;
-border-radius:10px;
+border-radius:12px;
 margin-bottom:15px;
 }
 
@@ -133,7 +132,7 @@ margin-bottom:15px;
 width:100%;
 max-height:400px;
 object-fit:cover;
-border-radius:8px;
+border-radius:10px;
 }
 
 /* Profile */
@@ -143,6 +142,18 @@ width:100px;
 height:100px;
 border-radius:50%;
 margin:auto;
+}
+
+.userRow{
+display:flex;
+align-items:center;
+gap:8px;
+margin-bottom:4px;
+}
+
+.userRow img{
+width:22px;
+height:22px;
 }
 
 </style>
@@ -193,6 +204,14 @@ Send
 <!-- Stories -->
 <div id="stories" class="page">
 
+<!-- Upload -->
+<div class="mb-3 flex gap-2">
+<input type="file" id="storyFile" accept="image/*,video/*">
+<button onclick="postStory()" class="bg-blue-600 text-white px-3 rounded">
+Post
+</button>
+</div>
+
 <div id="storyFeed" class="overflow-y-auto"></div>
 
 </div>
@@ -220,7 +239,7 @@ Save
 
 <script>
 
-/* Base path for GitHub */
+/* Base path */
 
 const BASE="https://svazny79.github.io/VAZapp/";
 
@@ -231,7 +250,6 @@ const pages=document.querySelectorAll(".page");
 function showPage(id){
 
 pages.forEach(p=>p.classList.remove("active"));
-
 document.getElementById(id).classList.add("active");
 
 if(id==="stories")renderStories();
@@ -243,7 +261,6 @@ if(id==="stories")renderStories();
 function toggleDark(){
 
 body.classList.toggle("dark");
-
 localStorage.dark=body.classList.contains("dark");
 
 }
@@ -253,9 +270,7 @@ localStorage.dark=body.classList.contains("dark");
 function loadPic(e){
 
 const r=new FileReader();
-
 r.onload=()=>avatar.src=r.result;
-
 r.readAsDataURL(e.target.files[0]);
 
 }
@@ -272,7 +287,9 @@ alert("Saved!");
 function loadProfile(){
 
 name.value=localStorage.name||"";
-if(localStorage.avatar)avatar.src=localStorage.avatar;
+
+if(localStorage.avatar)
+avatar.src=localStorage.avatar;
 
 }
 
@@ -289,7 +306,6 @@ d.className=u?"text-right text-blue-600":"text-green-600";
 d.textContent=(u?"You: ":"vazAI: ")+t;
 
 box.appendChild(d);
-
 box.scrollTop=999999;
 
 }
@@ -310,7 +326,7 @@ setTimeout(()=>add(ai(t),0),500);
 
 msg.onkeydown=e=>{
 if(e.key==="Enter")send();
-}
+};
 
 /* AI */
 
@@ -323,11 +339,11 @@ if(m.includes("hi"))return"Hey 👋";
 if(m.includes("who are you"))
 return"I'm vazAI inside VAZapp 😎";
 
-if(m.includes("mcdavid"))
-return"McDavid is unreal 🔥";
+if(m.includes("stock"))
+return"Markets are volatile today 📈📉";
 
-if(m.includes("help"))
-return"What do you need help with?";
+if(m.includes("football"))
+return"Big matchup this weekend 🏈";
 
 if(/\d+[\+\-\*\/]\d+/.test(m))
 return"Answer: "+eval(m);
@@ -340,7 +356,14 @@ return"Tell me more 👀";
 
 let stories=JSON.parse(localStorage.stories||"[]");
 
-/* Fixed fake posts */
+/* Logos */
+
+const logos={
+"NHL":BASE+"nhl.png",
+"NBC-News":BASE+"nbc.png"
+};
+
+/* Fixed Fake Stories */
 
 const fixed=[
 
@@ -370,19 +393,70 @@ u:"NBC-News",
 t:"Miami flooded after storm",
 src:BASE+"news.gif",
 type:"img"
+},
+
+{
+u:"MarketWatch",
+t:"Dow jumps 400 points after Fed news",
+src:BASE+"stocks.jpg",
+type:"img"
+},
+
+{
+u:"ESPN",
+t:"Chiefs win thriller in final seconds",
+src:BASE+"football.jpg",
+type:"img"
+},
+
+{
+u:"TechDaily",
+t:"Apple unveils new AI chip",
+src:BASE+"tech.jpg",
+type:"img"
 }
 
 ];
 
-/* Load fake once */
+/* Load once */
 
 if(!localStorage.fakeLoaded){
 
 stories=[...fixed,...stories];
-
 localStorage.fakeLoaded=1;
+saveStories();
+
+}
+
+/* User Post */
+
+function postStory(){
+
+const file=storyFile.files[0];
+
+if(!file)return alert("Select a file");
+
+const r=new FileReader();
+
+r.onload=()=>{
+
+stories.unshift({
+
+u:localStorage.name||"Guest",
+t:"My Story",
+src:r.result,
+type:file.type.startsWith("video")?"vid":"img"
+
+});
 
 saveStories();
+renderStories();
+
+storyFile.value="";
+
+};
+
+r.readAsDataURL(file);
 
 }
 
@@ -392,29 +466,37 @@ function renderStories(){
 
 storyFeed.innerHTML="";
 
-stories.forEach((s,i)=>{
+stories.forEach(s=>{
+
+if(!s.src)return;
 
 const d=document.createElement("div");
-
 d.className="story";
 
 let media="";
 
 if(s.type==="img"){
-
 media=`<img src="${s.src}">`;
-
 }
 
 if(s.type==="vid"){
-
 media=`<video src="${s.src}" controls></video>`;
+}
 
+/* Logo */
+
+let logo="";
+
+if(logos[s.u]){
+logo=`<img src="${logos[s.u]}">`;
 }
 
 d.innerHTML=`
 
+<div class="userRow">
+${logo}
 <b>${s.u}</b>
+</div>
 
 <p class="text-sm mb-1">${s.t}</p>
 
