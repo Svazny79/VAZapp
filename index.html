@@ -1,100 +1,191 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>VAZapp</title>
+
+<!-- PWA -->
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body{font-family:Arial;background:#000;color:#fff;margin:0}
+
+body{
+font-family:Arial;
+transition:.3s;
+overflow:hidden;
+}
+
+/* Dark */
+.dark{
+background:#111827;
+color:white;
+}
 
 /* Splash */
 #splash{
-position:fixed;inset:0;
-display:flex;justify-content:center;align-items:center;
-background:black;z-index:9999;
-font-size:3rem;font-weight:bold;
-transition:all 1.2s ease;
-}
-#splash.hide{opacity:0;transform:scale(1.2)}
-#splash span:first-child{color:#0ff;text-shadow:0 0 20px #0ff}
-
-/* Nav */
-nav{background:#2563eb;padding:10px;display:flex;justify-content:space-between}
-nav button{background:#1e40af;padding:6px 12px;border-radius:6px}
-
-/* Pages */
-.page{display:none;height:100vh}
-.page.active{display:block}
-
-/* Stories */
-#storiesFeed{
-height:90vh;
-overflow-y:auto;
-scroll-snap-type:y mandatory;
-}
-
-.story{
-height:90vh;
-scroll-snap-align:start;
+position:fixed;
+inset:0;
+background:black;
 display:flex;
 justify-content:center;
 align-items:center;
-position:relative;
+z-index:9999;
+font-size:3rem;
+font-weight:bold;
+animation:fadeOut 2s forwards 1.5s;
+}
+
+@keyframes glow{
+0%,100%{text-shadow:0 0 10px cyan}
+50%{text-shadow:0 0 30px cyan}
+}
+
+#splash span{
+animation:glow 1.5s infinite;
+color:cyan;
+}
+
+@keyframes fadeOut{
+to{opacity:0;pointer-events:none}
+}
+
+/* Layout */
+
+#app{
+display:flex;
+height:100vh;
+}
+
+/* Sidebar */
+
+#sidebar{
+width:80px;
+background:#2563eb;
+color:white;
+display:flex;
+flex-direction:column;
+align-items:center;
+padding:10px 0;
+gap:20px;
+}
+
+#sidebar button{
+width:50px;
+height:50px;
+border-radius:50%;
+background:#1d4ed8;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:20px;
+}
+
+#sidebar button:hover{
+background:#3b82f6;
+}
+
+/* Main */
+
+#main{
+flex:1;
+padding:15px;
+overflow:hidden;
+}
+
+/* Pages */
+
+.page{
+height:100%;
+display:none;
+}
+
+.page.active{
+display:flex;
 flex-direction:column;
 }
 
-.story img,.story video{
-max-height:70vh;
-max-width:95%;
-border-radius:12px;
-object-fit:contain;
-}
+/* Chat */
 
-.overlay{
-position:absolute;
-bottom:0;left:0;right:0;
-padding:15px;
-background:linear-gradient(transparent,rgba(0,0,0,.8));
-}
-
-.user{
-position:absolute;
-top:10px;left:10px;
-background:rgba(0,0,0,.6);
-padding:4px 8px;
+#chatBox{
+flex:1;
+overflow-y:auto;
+border:1px solid #ddd;
+padding:10px;
 border-radius:8px;
-font-weight:bold;
+margin-bottom:10px;
 }
+
+/* Stories */
+
+.story{
+border:1px solid #ddd;
+padding:10px;
+border-radius:10px;
+margin-bottom:15px;
+}
+
+.story img,
+.story video{
+width:100%;
+max-height:400px;
+object-fit:cover;
+border-radius:8px;
+}
+
+/* Profile */
+
+#profile img{
+width:100px;
+height:100px;
+border-radius:50%;
+margin:auto;
+}
+
 </style>
 </head>
 
-<body>
+<body id="body" class="bg-gray-100">
 
 <!-- Splash -->
 <div id="splash">
-<span>VAZ</span><span>app</span>
+<span>VAZapp</span>
 </div>
 
-<!-- Nav -->
-<nav>
-<b>VAZapp</b>
-<div>
-<button onclick="show('chat')">Chat</button>
-<button onclick="show('stories')">Stories</button>
-<button onclick="show('profile')">Profile</button>
+<div id="app">
+
+<!-- Sidebar -->
+<div id="sidebar">
+
+<button onclick="showPage('chat')">💬</button>
+<button onclick="showPage('stories')">📸</button>
+<button onclick="showPage('profile')">👤</button>
+<button onclick="toggleDark()">🌙</button>
+
 </div>
-</nav>
+
+<!-- Main -->
+<div id="main">
 
 <!-- Chat -->
-<div id="chat" class="page active p-4">
+<div id="chat" class="page active">
 
-<div id="chatBox" class="h-[75vh] overflow-y-auto border p-2 mb-2"></div>
+<div id="chatBox"></div>
 
 <div class="flex gap-2">
-<input id="msg" class="flex-1 p-2 text-black"/>
-<button onclick="send()">Send</button>
+
+<input id="msg"
+class="flex-1 border p-2 rounded"
+placeholder="Type message...">
+
+<button onclick="send()"
+class="bg-blue-600 text-white px-4 rounded">
+Send
+</button>
+
 </div>
 
 </div>
@@ -102,196 +193,267 @@ font-weight:bold;
 <!-- Stories -->
 <div id="stories" class="page">
 
-<input type="file" accept="image/*,video/*"
-class="m-2"
-onchange="upload(event)">
-
-<div id="storiesFeed"></div>
+<div id="storyFeed" class="overflow-y-auto"></div>
 
 </div>
 
 <!-- Profile -->
-<div id="profile" class="page p-4">
+<div id="profile" class="page">
 
-<img id="avatar" class="w-24 h-24 rounded-full mb-2"
-src="https://via.placeholder.com/120">
+<img id="avatar" src="https://via.placeholder.com/100">
 
-<input type="file" accept="image/*"
-onchange="loadImg(event)"><br><br>
+<input type="file" onchange="loadPic(event)" class="my-3">
 
-<input id="name" class="p-2 text-black w-full mb-2"
+<input id="name"
+class="border p-2 w-full mb-2"
 placeholder="Username">
 
-<button onclick="save()">Save</button>
+<button onclick="saveProfile()"
+class="bg-blue-600 text-white p-2 rounded w-full">
+Save
+</button>
 
+</div>
+
+</div>
 </div>
 
 <script>
 
-/* Splash */
-setTimeout(()=>{
-splash.classList.add("hide");
-setTimeout(()=>splash.remove(),1200);
-},1500);
+/* Base path for GitHub */
 
-/* Nav */
-function show(id){
-document.querySelectorAll(".page")
-.forEach(p=>p.classList.remove("active"));
+const BASE="https://svazny79.github.io/VAZapp/";
+
+/* Pages */
+
+const pages=document.querySelectorAll(".page");
+
+function showPage(id){
+
+pages.forEach(p=>p.classList.remove("active"));
+
 document.getElementById(id).classList.add("active");
 
-if(id==="stories") render();
+if(id==="stories")renderStories();
+
+}
+
+/* Dark */
+
+function toggleDark(){
+
+body.classList.toggle("dark");
+
+localStorage.dark=body.classList.contains("dark");
+
 }
 
 /* Profile */
-function loadImg(e){
+
+function loadPic(e){
+
 const r=new FileReader();
+
 r.onload=()=>avatar.src=r.result;
+
 r.readAsDataURL(e.target.files[0]);
+
 }
 
-function save(){
-localStorage.user=name.value||"Guest";
+function saveProfile(){
+
+localStorage.name=name.value||"Guest";
 localStorage.avatar=avatar.src;
+
 alert("Saved!");
+
 }
 
-if(localStorage.avatar) avatar.src=localStorage.avatar;
-if(localStorage.user) name.value=localStorage.user;
+function loadProfile(){
+
+name.value=localStorage.name||"";
+if(localStorage.avatar)avatar.src=localStorage.avatar;
+
+}
 
 /* Chat */
+
+const box=document.getElementById("chatBox");
+
 function add(t,u){
+
 const d=document.createElement("div");
+
+d.className=u?"text-right text-blue-600":"text-green-600";
+
 d.textContent=(u?"You: ":"vazAI: ")+t;
-d.className=u?"text-blue-400":"text-green-400";
-chatBox.appendChild(d);
-chatBox.scrollTop=999999;
+
+box.appendChild(d);
+
+box.scrollTop=999999;
+
 }
 
 function send(){
-if(!msg.value)return;
-add(msg.value,1);
-setTimeout(()=>add(ai(msg.value),0),500);
+
+const t=msg.value.trim();
+
+if(!t)return;
+
+add(t,1);
+
 msg.value="";
+
+setTimeout(()=>add(ai(t),0),500);
+
 }
 
+msg.onkeydown=e=>{
+if(e.key==="Enter")send();
+}
+
+/* AI */
+
 function ai(m){
+
 m=m.toLowerCase();
+
 if(m.includes("hi"))return"Hey 👋";
-if(m.includes("help"))return"What do you need?";
-if(/\d+[\+\-\*\/]\d+/.test(m))return"="+eval(m);
-return"Tell me more 🙂";
+
+if(m.includes("who are you"))
+return"I'm vazAI inside VAZapp 😎";
+
+if(m.includes("mcdavid"))
+return"McDavid is unreal 🔥";
+
+if(m.includes("help"))
+return"What do you need help with?";
+
+if(/\d+[\+\-\*\/]\d+/.test(m))
+return"Answer: "+eval(m);
+
+return"Tell me more 👀";
+
 }
 
 /* Stories */
 
 let stories=JSON.parse(localStorage.stories||"[]");
 
-/* Fixed NHL + News */
+/* Fixed fake posts */
+
 const fixed=[
-{u:"NHL",t:"Connor McDavid scores 2 vs Flames",s:"mcdavid.png",m:"img"},
-{u:"NHL",t:"Leafs win OT vs Bruins",s:"leafs.gif",m:"img"},
-{u:"NHL",t:"Rangers clinch playoff at MSG",s:"rangers.gif",m:"img"},
-{u:"NBC-News",t:"Miami flooded after storm",s:"news.gif",m:"img"}
+
+{
+u:"NHL",
+t:"Connor McDavid scores 2 vs Flames",
+src:BASE+"mcdavid.png",
+type:"img"
+},
+
+{
+u:"NHL",
+t:"Leafs win OT vs Bruins",
+src:BASE+"leafs.gif",
+type:"img"
+},
+
+{
+u:"NHL",
+t:"Rangers clinch playoff at MSG",
+src:BASE+"rangers.gif",
+type:"img"
+},
+
+{
+u:"NBC-News",
+t:"Miami flooded after storm",
+src:BASE+"news.gif",
+type:"img"
+}
+
 ];
 
-function loadFixed(){
+/* Load fake once */
 
-if(!localStorage.fixedLoaded){
+if(!localStorage.fakeLoaded){
 
-fixed.forEach(f=>{
-stories.push({
-id:Date.now()+Math.random(),
-user:f.u,
-text:f.t,
-src:f.s,
-type:f.m,
-fake:1
-});
-});
+stories=[...fixed,...stories];
 
-localStorage.fixedLoaded=1;
-saveStories();
-}
-}
-
-loadFixed();
-
-function upload(e){
-
-const f=e.target.files[0];
-if(!f)return;
-
-const cap=prompt("Caption")||"My story";
-const r=new FileReader();
-
-r.onload=()=>{
-
-stories.unshift({
-id:Date.now(),
-user:localStorage.user||"Guest",
-text:cap,
-src:r.result,
-type:f.type.startsWith("image")?"img":"vid"
-});
+localStorage.fakeLoaded=1;
 
 saveStories();
-render();
-};
 
-r.readAsDataURL(f);
 }
 
-function saveStories(){
-localStorage.stories=JSON.stringify(stories);
-}
+/* Render */
 
-function render(){
+function renderStories(){
 
-storiesFeed.innerHTML="";
+storyFeed.innerHTML="";
 
 stories.forEach((s,i)=>{
 
 const d=document.createElement("div");
+
 d.className="story";
 
-let media=
-s.type==="img"
-?`<img src="${s.src}">`
-:`<video src="${s.src}" autoplay loop muted></video>`;
+let media="";
+
+if(s.type==="img"){
+
+media=`<img src="${s.src}">`;
+
+}
+
+if(s.type==="vid"){
+
+media=`<video src="${s.src}" controls></video>`;
+
+}
 
 d.innerHTML=`
-<div class="user">${s.user}</div>
+
+<b>${s.u}</b>
+
+<p class="text-sm mb-1">${s.t}</p>
+
 ${media}
-<div class="overlay">
-<p>${s.text}</p>
-</div>
+
 `;
 
-storiesFeed.appendChild(d);
+storyFeed.appendChild(d);
 
 });
+
 }
 
-/* Swipe */
+/* Save */
 
-let y=0;
+function saveStories(){
 
-storiesFeed.addEventListener("touchstart",
-e=>y=e.touches[0].clientY);
+localStorage.stories=JSON.stringify(stories);
 
-storiesFeed.addEventListener("touchend",
-e=>{
-let d=y-e.changedTouches[0].clientY;
-
-if(Math.abs(d)>60){
-storiesFeed.scrollBy({
-top:d>0?window.innerHeight:-window.innerHeight,
-behavior:"smooth"
-});
 }
-});
+
+/* Init */
+
+function init(){
+
+if(localStorage.dark==="true")
+body.classList.add("dark");
+
+loadProfile();
+
+add("Welcome to VAZapp 🤖",0);
+
+renderStories();
+
+}
+
+init();
 
 </script>
+
 </body>
 </html>
