@@ -7,437 +7,531 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 
+<link rel="manifest" id="manifest">
+
+<meta name="theme-color" content="#2563eb">
+
 <style>
 
-/* ================= BODY ================= */
+/* ===== GENERAL ===== */
 
 body{
-  font-family:Arial, sans-serif;
-  background:#0f172a;
-  color:white;
-  overflow:hidden;
+font-family:Arial,Helvetica,sans-serif;
+transition:.3s;
 }
 
-/* ================= SPLASH ================= */
+.dark{
+background:#0f172a;
+color:white;
+}
+
+.dark .bg-white{
+background:#1e293b!important;
+color:white;
+}
+
+/* ===== SPLASH ===== */
+
+@keyframes glow{
+0%,100%{text-shadow:0 0 10px cyan,0 0 30px cyan}
+50%{text-shadow:0 0 25px cyan,0 0 60px cyan}
+}
 
 #splash{
-  position:fixed;
-  inset:0;
-  background:black;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  font-size:4rem;
-  font-weight:bold;
-  z-index:9999;
-  transition:1.2s ease;
+position:fixed;
+inset:0;
+background:black;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
+font-size:3rem;
+font-weight:bold;
+animation:fadeout 1.8s ease forwards;
+animation-delay:2s;
+}
+
+@keyframes fadeout{
+to{opacity:0;visibility:hidden}
 }
 
 #splash span:first-child{
-  color:#0ff;
-  text-shadow:0 0 25px cyan;
-  animation:glow 1.5s infinite alternate;
+color:cyan;
+animation:glow 1.5s infinite;
 }
 
-@keyframes glow{
-  from{ text-shadow:0 0 10px cyan;}
-  to{ text-shadow:0 0 35px cyan;}
+#splash span:last-child{
+color:white;
+font-weight:900;
 }
 
-/* ================= HEADER ================= */
+/* ===== STORIES ===== */
 
-header{
-  background:#020617;
-  padding:10px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-/* ================= MAIN ================= */
-
-main{
-  height:calc(100vh - 100px);
-  overflow:hidden;
-}
-
-/* ================= STORIES ================= */
-
-#storiesPage{
-  height:100%;
-  overflow-y:auto;
-  scroll-snap-type:y mandatory;
+#storiesFeed{
+height:80vh;
+overflow-y:scroll;
+scroll-snap-type:y mandatory;
 }
 
 .story{
-  height:100%;
-  scroll-snap-align:start;
-  position:relative;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:black;
+scroll-snap-align:start;
+height:80vh;
+display:flex;
+flex-direction:column;
+justify-content:center;
 }
 
-.story img,
-.story video{
-  max-height:100%;
-  max-width:100%;
-  object-fit:contain;
+.story img,.story video{
+max-height:65vh;
+object-fit:contain;
+margin:auto;
+border-radius:12px;
 }
 
-.storyOverlay{
-  position:absolute;
-  bottom:0;
-  width:100%;
-  background:linear-gradient(transparent,black);
-  padding:20px;
-}
+/* ===== LOGOS ===== */
 
 .logo{
-  width:28px;
-  height:28px;
-  object-fit:contain;
+width:26px;
+height:26px;
+border-radius:50%;
+margin-right:6px;
 }
 
-/* ================= CHAT ================= */
+/* ===== CHAT ===== */
 
-#chat{
-  height:100%;
-  overflow-y:auto;
+.chatbox{
+max-height:65vh;
+overflow-y:auto;
 }
-
-/* ================= HIDE ================= */
-
-.hidden{ display:none; }
 
 </style>
 </head>
 
-<body>
 
-<!-- ================= SPLASH ================= -->
+<body id="body" class="bg-gray-100 min-h-screen flex flex-col">
+
+
+<!-- SPLASH -->
 
 <div id="splash">
-  <span>VAZ</span><span>app</span>
+<span>VAZ</span><span>app</span>
 </div>
 
-<!-- ================= HEADER ================= -->
 
-<header>
-  <h1 class="text-xl font-bold">VAZapp</h1>
+<!-- HEADER -->
 
-  <div class="space-x-2">
-    <button onclick="showChat()">Chat</button>
-    <button onclick="showStories()">Stories</button>
-    <button onclick="showProfile()">Profile</button>
-  </div>
+<header class="bg-blue-600 text-white p-4 flex justify-between items-center">
+
+<h1 class="font-bold text-xl">VAZapp</h1>
+
+<div class="space-x-2">
+
+<button onclick="showPage('chat')" class="bg-blue-500 px-3 py-1 rounded">Chat</button>
+
+<button onclick="showPage('stories')" class="bg-blue-500 px-3 py-1 rounded">Stories</button>
+
+<button onclick="showPage('profile')" class="bg-blue-500 px-3 py-1 rounded">Profile</button>
+
+<button onclick="toggleDark()" class="bg-gray-800 px-3 py-1 rounded">🌙</button>
+
+</div>
+
 </header>
 
-<!-- ================= MAIN ================= -->
 
-<main>
+<!-- MAIN -->
 
-<!-- ================= CHAT ================= -->
+<main class="flex-1 p-4 flex justify-center">
 
-<div id="chatPage" class="h-full flex flex-col p-3">
 
-<div id="chat" class="flex-1 bg-gray-900 rounded p-2 mb-2"></div>
+<!-- CHAT -->
+
+<div id="chat" class="page bg-white max-w-xl w-full p-4 rounded shadow flex flex-col">
+
+<div class="flex items-center gap-2 mb-2">
+
+<img id="chatAvatar" class="w-8 h-8 rounded-full" src="https://via.placeholder.com/40">
+
+<b id="chatName">Guest</b>
+
+</div>
+
+<div id="chatBox" class="chatbox border p-2 rounded mb-2 flex-1"></div>
 
 <div class="flex gap-2">
-<input id="msg" class="flex-1 text-black p-2 rounded">
-<button onclick="send()">Send</button>
-</div>
+
+<input id="chatInput" class="flex-1 border p-2 rounded" placeholder="Type...">
+
+<button onclick="sendChat()" class="bg-blue-600 text-white px-3 rounded">Send</button>
 
 </div>
 
-<!-- ================= STORIES ================= -->
+</div>
 
-<div id="storiesPage" class="hidden"></div>
 
-<!-- ================= PROFILE ================= -->
+<!-- STORIES -->
 
-<div id="profilePage" class="hidden p-4">
+<div id="stories" class="page hidden bg-white max-w-xl w-full p-4 rounded shadow">
 
-<h2 class="text-xl mb-2">Profile</h2>
+<input type="file" accept="image/*,video/*" onchange="uploadStory(event)" class="mb-2">
 
-<img id="avatar" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full mb-2">
+<div id="storiesFeed"></div>
 
-<input type="file" onchange="loadPic(event)">
+</div>
 
-<input id="username" class="text-black w-full p-2 my-2">
 
-<button onclick="saveProfile()">Save</button>
+<!-- PROFILE -->
 
-<hr class="my-3">
+<div id="profile" class="page hidden bg-white max-w-md w-full p-4 rounded shadow">
 
-<h3>Add Story</h3>
+<h2 class="font-bold text-xl mb-3">Profile</h2>
 
-<input type="file" accept="image/*,video/*" onchange="addStory(event)">
+<img id="profilePic" class="w-24 h-24 mx-auto rounded-full mb-2" src="https://via.placeholder.com/120">
+
+<input type="file" accept="image/*" onchange="loadPic(event)">
+
+<input id="username" class="border p-2 w-full my-2" placeholder="Username">
+
+<button onclick="saveProfile()" class="bg-blue-600 text-white w-full p-2 rounded">Save</button>
 
 </div>
 
 </main>
 
-<!-- ================= SCRIPT ================= -->
+
+<footer class="bg-gray-200 p-2 text-center text-sm">
+©2026 VAZapp
+</footer>
+
 
 <script>
 
-/* ================= SPLASH ================= */
+/* ===== PWA ===== */
 
-setTimeout(()=>{
-  splash.style.opacity="0";
-  setTimeout(()=>splash.remove(),1200);
-},1600);
+const manifest={
+name:"VAZapp",
+short_name:"VAZapp",
+start_url:".",
+display:"standalone",
+background_color:"#000",
+theme_color:"#2563eb",
+icons:[
+{src:"https://cdn-icons-png.flaticon.com/512/5968/5968705.png",sizes:"192x192"},
+{src:"https://cdn-icons-png.flaticon.com/512/5968/5968705.png",sizes:"512x512"}
+]
+};
 
+const blob=new Blob([JSON.stringify(manifest)],{type:"application/json"});
+document.getElementById("manifest").href=URL.createObjectURL(blob);
 
-/* ================= NAV ================= */
+if("serviceWorker"in navigator){
 
-const chatPage=document.getElementById("chatPage");
-const storiesPage=document.getElementById("storiesPage");
-const profilePage=document.getElementById("profilePage");
+const sw=`
+self.addEventListener('install',e=>{
+e.waitUntil(caches.open('vaz').then(c=>c.addAll(['./'])))
+});
+self.addEventListener('fetch',e=>{
+e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request)))
+});
+`;
 
-function showChat(){
-  chatPage.classList.remove("hidden");
-  storiesPage.classList.add("hidden");
-  profilePage.classList.add("hidden");
+const b=new Blob([sw],{type:"text/js"});
+navigator.serviceWorker.register(URL.createObjectURL(b));
+
 }
 
-function showStories(){
-  storiesPage.classList.remove("hidden");
-  chatPage.classList.add("hidden");
-  profilePage.classList.add("hidden");
-  renderStories();
+
+/* ===== NAV ===== */
+
+function showPage(p){
+
+document.querySelectorAll(".page").forEach(e=>e.classList.add("hidden"));
+
+document.getElementById(p).classList.remove("hidden");
+
+if(p==="stories")renderStories();
+
 }
 
-function showProfile(){
-  profilePage.classList.remove("hidden");
-  chatPage.classList.add("hidden");
-  storiesPage.classList.add("hidden");
+
+/* ===== DARK ===== */
+
+function toggleDark(){
+body.classList.toggle("dark");
+localStorage.dark=body.classList.contains("dark");
 }
 
 
-/* ================= PROFILE ================= */
+/* ===== PROFILE ===== */
 
 function loadPic(e){
-  const r=new FileReader();
-  r.onload=()=>avatar.src=r.result;
-  r.readAsDataURL(e.target.files[0]);
+const r=new FileReader();
+r.onload=()=>profilePic.src=r.result;
+r.readAsDataURL(e.target.files[0]);
 }
 
 function saveProfile(){
-  localStorage.user=username.value||"Guest";
-  localStorage.pic=avatar.src;
+
+localStorage.user=username.value||"Guest";
+localStorage.pic=profilePic.src;
+
+loadProfile();
+
+showPage("chat");
 }
 
-if(localStorage.pic) avatar.src=localStorage.pic;
-if(localStorage.user) username.value=localStorage.user;
+function loadProfile(){
 
+chatName.textContent=localStorage.user||"Guest";
+username.value=localStorage.user||"";
 
-/* ================= CHAT ================= */
-
-function add(text,me){
-  const d=document.createElement("div");
-
-  d.className=me?"text-right text-cyan-400":"text-green-400";
-
-  d.innerText=(me?"You: ":"vazAI: ")+text;
-
-  chat.appendChild(d);
-  chat.scrollTop=999999;
+if(localStorage.pic){
+chatAvatar.src=localStorage.pic;
+profilePic.src=localStorage.pic;
 }
 
-function send(){
-  const t=msg.value.trim();
-  if(!t) return;
-
-  add(t,true);
-  msg.value="";
-
-  setTimeout(()=>add(ai(t),false),600);
-}
-
-msg.onkeydown=e=>{
-  if(e.key==="Enter") send();
 }
 
 
-/* ================= AI ================= */
+/* ===== CHAT ===== */
+
+function addChat(t,u){
+
+const d=document.createElement("div");
+
+d.className=u?"text-right text-blue-600":"text-left text-green-600";
+
+d.textContent=(u?"You: ":"vazAI: ")+t;
+
+chatBox.appendChild(d);
+
+chatBox.scrollTop=999999;
+
+}
+
+function sendChat(){
+
+const t=chatInput.value.trim();
+
+if(!t)return;
+
+addChat(t,1);
+
+chatInput.value="";
+
+setTimeout(()=>addChat(ai(t),0),500);
+
+}
+
+chatInput.onkeydown=e=>{
+if(e.key==="Enter")sendChat();
+};
 
 function ai(m){
 
-  m=m.toLowerCase();
+m=m.toLowerCase();
 
-  if(m.includes("code"))
-    return "Tell me what you're building and I’ll help.";
+if(m.match(/\d+[+\-*\/]\d+/))return"Answer: "+eval(m);
 
-  if(m.includes("math"))
-    return "Send the problem and I’ll solve it.";
+if(m.includes("help"))return"What do you need help with?";
 
-  if(m.includes("sad"))
-    return "Talk to me. What’s going on?";
+if(m.includes("code"))return"I can help you debug or build.";
 
-  if(m.includes("who"))
-    return "Who exactly are you asking about?";
+if(m.includes("sad"))return"I'm here for you 💙";
 
-  if(m.includes("how"))
-    return "Let’s break it down step by step.";
+if(m.includes("sports"))return"Who’s your favorite team?";
 
-  return "Interesting. Tell me more details.";
+if(m.includes("news"))return"Want world, tech, or sports news?";
+
+return"Tell me more.";
+
 }
 
 
-/* ================= STORIES ================= */
+/* ===== STORIES ===== */
 
-let stories = JSON.parse(localStorage.stories||"[]");
+let stories=JSON.parse(localStorage.stories||"[]");
 
-
-/* ================= FAKE STORIES ================= */
 
 const fakeStories=[
 
 {
 user:"NHL",
-logo:"nhl.png",
-media:"mcdavid.png",
-caption:"Connor McDavid scores twice vs Flames"
+logo:"https://upload.wikimedia.org/wikipedia/en/3/3a/NHL_Logo.svg",
+type:"image",
+src:"https://i.imgur.com/9p9qkQF.jpg",
+text:"Connor McDavid scores twice vs Flames"
 },
 
 {
 user:"NHL",
-logo:"nhl.png",
-media:"leafs.gif",
-caption:"Maple Leafs win overtime vs Bruins"
+logo:"https://upload.wikimedia.org/wikipedia/en/3/3a/NHL_Logo.svg",
+type:"gif",
+src:"https://media.giphy.com/media/3ohs4BSacFKI7A717y/giphy.gif",
+text:"Maple Leafs OT winner vs Bruins"
 },
 
 {
 user:"NHL",
-logo:"nhl.png",
-media:"rangers.gif",
-caption:"Rangers clinch playoff spot at MSG"
+logo:"https://upload.wikimedia.org/wikipedia/en/3/3a/NHL_Logo.svg",
+type:"gif",
+src:"https://media.giphy.com/media/l0HlRm0jS9ZJtU2wE/giphy.gif",
+text:"Rangers clinch playoff spot"
 },
 
 {
 user:"NBC News",
-logo:"nbc.png",
-media:"news.gif",
-caption:"Breaking: Market reacts to Fed announcement"
-},
-
-{
-user:"NBC News",
-logo:"nbc.png",
-media:"stocks.jpg",
-caption:"Dow jumps 400 points on tech rally"
+logo:"https://upload.wikimedia.org/wikipedia/commons/7/79/NBC_News_2013.svg",
+type:"image",
+src:"https://i.imgur.com/lrKq8zN.jpg",
+text:"Stocks surge after Fed announcement"
 },
 
 {
 user:"NFL",
-logo:"football.gif",
-media:"football.gif",
-caption:"Touchdown seals dramatic comeback"
+logo:"https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg",
+type:"image",
+src:"https://i.imgur.com/Ww5Yy0Q.jpg",
+text:"Chiefs win AFC Championship"
 }
 
 ];
 
+
 if(!localStorage.fakeLoaded){
 
-  fakeStories.forEach(s=>{
-    stories.push({
-      id:Date.now()+Math.random(),
-      ...s,
-      type:"fake"
-    });
-  });
+stories=fakeStories;
 
-  localStorage.fakeLoaded="yes";
-  saveStories();
+localStorage.fakeLoaded=1;
+
+saveStories();
+
 }
 
 
-/* ================= USER STORY ================= */
+function uploadStory(e){
 
-function addStory(e){
+const f=e.target.files[0];
 
-  const f=e.target.files[0];
-  if(!f) return;
+if(!f)return;
 
-  const r=new FileReader();
+const cap=prompt("Caption")||"My Story";
 
-  r.onload=()=>{
+const type=f.type.startsWith("image")?"image":"video";
 
-    stories.unshift({
-      id:Date.now(),
-      user:localStorage.user||"Guest",
-      logo:localStorage.pic||"",
-      media:r.result,
-      caption:"My story",
-      type:"user"
-    });
+const r=new FileReader();
 
-    saveStories();
-    renderStories();
-  };
+r.onload=()=>{
 
-  r.readAsDataURL(f);
+stories.unshift({
+user:localStorage.user||"Guest",
+logo:"",
+type,
+src:r.result,
+text:cap
+});
+
+saveStories();
+
+renderStories();
+
+};
+
+r.readAsDataURL(f);
+
 }
 
-
-/* ================= STORAGE ================= */
 
 function saveStories(){
-  localStorage.stories=JSON.stringify(stories);
+
+localStorage.stories=JSON.stringify(stories);
+
 }
 
 
-/* ================= RENDER ================= */
+function deleteStory(i){
+
+if(!confirm("Delete?"))return;
+
+stories.splice(i,1);
+
+saveStories();
+
+renderStories();
+
+}
+
 
 function renderStories(){
 
-  storiesPage.innerHTML="";
+storiesFeed.innerHTML="";
 
-  stories.forEach(s=>{
+stories.forEach((s,i)=>{
 
-    const box=document.createElement("div");
-    box.className="story";
+if(!s.src)return;
 
-    let media="";
+const d=document.createElement("div");
 
-    if(s.media.endsWith(".mp4")||s.media.includes("video")){
-      media=`<video src="${s.media}" autoplay muted loop playsinline></video>`;
-    }else{
-      media=`<img src="${s.media}">`;
-    }
+d.className="story border rounded p-3 mb-4";
 
-    box.innerHTML=`
+let media="";
 
-    ${media}
+if(s.type==="image"||s.type==="gif"){
+media=`<img src="${s.src}" loading="lazy">`;
+}
+else{
+media=`<video src="${s.src}" controls></video>`;
+}
 
-    <div class="storyOverlay">
+const del=s.user===(localStorage.user||"Guest")
+?`<button onclick="deleteStory(${i})" class="text-red-500">🗑️</button>`:"";
 
-      <div class="flex items-center gap-2 mb-1">
+d.innerHTML=`
 
-        ${s.logo?`<img src="${s.logo}" class="logo">`:""}
+<div class="flex items-center justify-between mb-1">
 
-        <b>${s.user}</b>
+<div class="flex items-center">
 
-      </div>
+${s.logo?`<img src="${s.logo}" class="logo">`:""}
 
-      <p>${s.caption}</p>
+<b>${s.user}</b>
 
-    </div>
-    `;
+</div>
 
-    storiesPage.appendChild(box);
-  });
+${del}
+
+</div>
+
+${media}
+
+<p class="mt-1 text-sm">${s.text}</p>
+
+`;
+
+storiesFeed.appendChild(d);
+
+});
+
 }
 
 
-/* ================= INIT ================= */
+/* ===== INIT ===== */
 
-add("Hi! I'm vazAI 🤖",false);
+function init(){
 
-renderStories();
+if(localStorage.dark==="true")body.classList.add("dark");
+
+if(!localStorage.user){
+localStorage.user="Guest";
+}
+
+loadProfile();
+
+addChat("Hi! I'm vazAI 🤖",0);
+
+}
+
+init();
 
 </script>
 
