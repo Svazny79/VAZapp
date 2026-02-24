@@ -4,339 +4,442 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VAZapp</title>
+
 <script src="https://cdn.tailwindcss.com"></script>
 
-<meta name="theme-color" content="#2563eb">
-
 <style>
-body{font-family:Arial,sans-serif}
-.dark{background:#111827;color:#fff}
-.dark .card{background:#1f2933}
 
-@keyframes glow{
-0%,100%{text-shadow:0 0 5px #0ff}
-50%{text-shadow:0 0 25px #0ff}
+/* ================= BODY ================= */
+
+body{
+  font-family:Arial, sans-serif;
+  background:#0f172a;
+  color:white;
+  overflow:hidden;
 }
+
+/* ================= SPLASH ================= */
 
 #splash{
-position:fixed;inset:0;
-background:black;
-display:flex;
-justify-content:center;
-align-items:center;
-font-size:3rem;
-font-weight:bold;
-z-index:9999;
-transition:opacity 1.2s ease;
+  position:fixed;
+  inset:0;
+  background:black;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-size:4rem;
+  font-weight:bold;
+  z-index:9999;
+  transition:1.2s ease;
 }
 
-#splash .vaz{color:#0ff;animation:glow 1.5s infinite}
-#splash .app{color:white}
-
-.storyBox{
-max-width:420px;
-margin:auto;
+#splash span:first-child{
+  color:#0ff;
+  text-shadow:0 0 25px cyan;
+  animation:glow 1.5s infinite alternate;
 }
 
-.storyMedia{
-max-height:520px;
-object-fit:contain;
-margin:auto;
-border-radius:12px;
+@keyframes glow{
+  from{ text-shadow:0 0 10px cyan;}
+  to{ text-shadow:0 0 35px cyan;}
 }
+
+/* ================= HEADER ================= */
+
+header{
+  background:#020617;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+/* ================= MAIN ================= */
+
+main{
+  height:calc(100vh - 100px);
+  overflow:hidden;
+}
+
+/* ================= STORIES ================= */
+
+#storiesPage{
+  height:100%;
+  overflow-y:auto;
+  scroll-snap-type:y mandatory;
+}
+
+.story{
+  height:100%;
+  scroll-snap-align:start;
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  background:black;
+}
+
+.story img,
+.story video{
+  max-height:100%;
+  max-width:100%;
+  object-fit:contain;
+}
+
+.storyOverlay{
+  position:absolute;
+  bottom:0;
+  width:100%;
+  background:linear-gradient(transparent,black);
+  padding:20px;
+}
+
+.logo{
+  width:28px;
+  height:28px;
+  object-fit:contain;
+}
+
+/* ================= CHAT ================= */
+
+#chat{
+  height:100%;
+  overflow-y:auto;
+}
+
+/* ================= HIDE ================= */
+
+.hidden{ display:none; }
+
 </style>
 </head>
 
-<body id="body" class="bg-gray-100 min-h-screen flex">
+<body>
 
-<!-- Splash -->
+<!-- ================= SPLASH ================= -->
+
 <div id="splash">
-<span><span class="vaz">VAZ</span><span class="app">app</span></span>
+  <span>VAZ</span><span>app</span>
 </div>
 
-<!-- Sidebar -->
-<div class="w-48 bg-blue-700 text-white flex flex-col p-3 gap-2">
+<!-- ================= HEADER ================= -->
 
-<h2 class="font-bold text-xl mb-3">VAZapp</h2>
+<header>
+  <h1 class="text-xl font-bold">VAZapp</h1>
 
-<button onclick="show('chat')" class="p-2 bg-blue-600 rounded">💬 Chat</button>
-<button onclick="show('stories')" class="p-2 bg-blue-600 rounded">📸 Stories</button>
-<button onclick="show('profile')" class="p-2 bg-blue-600 rounded">👤 Profile</button>
-<button onclick="toggleDark()" class="p-2 bg-gray-800 rounded">🌙 Dark</button>
+  <div class="space-x-2">
+    <button onclick="showChat()">Chat</button>
+    <button onclick="showStories()">Stories</button>
+    <button onclick="showProfile()">Profile</button>
+  </div>
+</header>
 
-</div>
+<!-- ================= MAIN ================= -->
 
-<!-- Main -->
-<div class="flex-1 p-4">
+<main>
 
-<!-- CHAT -->
-<div id="chat" class="card bg-white p-4 rounded shadow flex flex-col h-[90vh]">
+<!-- ================= CHAT ================= -->
 
-<div class="flex gap-2 items-center mb-2">
-<img id="avatar" class="w-8 h-8 rounded-full" src="https://via.placeholder.com/40">
-<b id="name">Guest</b>
-</div>
+<div id="chatPage" class="h-full flex flex-col p-3">
 
-<div id="msgs" class="flex-1 border p-2 overflow-y-auto mb-2"></div>
+<div id="chat" class="flex-1 bg-gray-900 rounded p-2 mb-2"></div>
 
 <div class="flex gap-2">
-<input id="input" class="flex-1 border p-2 rounded" placeholder="Type...">
-<button onclick="send()" class="bg-blue-600 text-white px-3 rounded">Send</button>
+<input id="msg" class="flex-1 text-black p-2 rounded">
+<button onclick="send()">Send</button>
 </div>
 
 </div>
 
-<!-- STORIES -->
-<div id="stories" class="hidden">
+<!-- ================= STORIES ================= -->
 
-<h2 class="text-xl font-bold mb-2">Stories</h2>
+<div id="storiesPage" class="hidden"></div>
 
-<input id="file" type="file" accept="image/*,video/*" class="mb-3">
+<!-- ================= PROFILE ================= -->
 
-<button onclick="postStory()" class="bg-blue-600 text-white px-3 py-1 rounded mb-3">
-Post
-</button>
+<div id="profilePage" class="hidden p-4">
 
-<div id="feed" class="space-y-5"></div>
+<h2 class="text-xl mb-2">Profile</h2>
 
-</div>
+<img id="avatar" src="https://via.placeholder.com/100" class="w-24 h-24 rounded-full mb-2">
 
-<!-- PROFILE -->
-<div id="profile" class="hidden card bg-white p-4 rounded shadow max-w-md">
+<input type="file" onchange="loadPic(event)">
 
-<h2 class="text-xl font-bold mb-2">Profile</h2>
+<input id="username" class="text-black w-full p-2 my-2">
 
-<img id="prev" class="w-24 h-24 rounded-full mb-2 mx-auto"
-src="https://via.placeholder.com/120">
+<button onclick="saveProfile()">Save</button>
 
-<input type="file" accept="image/*" onchange="loadPic(event)">
+<hr class="my-3">
 
-<input id="user" class="border p-2 w-full my-2" placeholder="Username">
+<h3>Add Story</h3>
 
-<button onclick="save()" class="bg-blue-600 text-white w-full p-2 rounded">
-Save
-</button>
+<input type="file" accept="image/*,video/*" onchange="addStory(event)">
 
 </div>
 
-</div>
+</main>
+
+<!-- ================= SCRIPT ================= -->
 
 <script>
 
-/* SPLASH */
-window.onload=()=>{
+/* ================= SPLASH ================= */
+
 setTimeout(()=>{
-splash.style.opacity=0;
-setTimeout(()=>splash.remove(),1200);
+  splash.style.opacity="0";
+  setTimeout(()=>splash.remove(),1200);
 },1600);
+
+
+/* ================= NAV ================= */
+
+const chatPage=document.getElementById("chatPage");
+const storiesPage=document.getElementById("storiesPage");
+const profilePage=document.getElementById("profilePage");
+
+function showChat(){
+  chatPage.classList.remove("hidden");
+  storiesPage.classList.add("hidden");
+  profilePage.classList.add("hidden");
 }
 
-/* NAV */
-const pages={
-chat:chat,
-stories:stories,
-profile:profile
-};
-
-function show(p){
-Object.values(pages).forEach(x=>x.classList.add("hidden"));
-pages[p].classList.remove("hidden");
-render();
+function showStories(){
+  storiesPage.classList.remove("hidden");
+  chatPage.classList.add("hidden");
+  profilePage.classList.add("hidden");
+  renderStories();
 }
 
-/* DARK */
-function toggleDark(){
-body.classList.toggle("dark");
-localStorage.dark=body.classList.contains("dark");
+function showProfile(){
+  profilePage.classList.remove("hidden");
+  chatPage.classList.add("hidden");
+  storiesPage.classList.add("hidden");
 }
 
-/* PROFILE */
+
+/* ================= PROFILE ================= */
+
 function loadPic(e){
-const r=new FileReader();
-r.onload=()=>prev.src=r.result;
-r.readAsDataURL(e.target.files[0]);
+  const r=new FileReader();
+  r.onload=()=>avatar.src=r.result;
+  r.readAsDataURL(e.target.files[0]);
 }
 
-function save(){
-localStorage.user=user.value||"Guest";
-localStorage.pic=prev.src;
-load();
-show("chat");
+function saveProfile(){
+  localStorage.user=username.value||"Guest";
+  localStorage.pic=avatar.src;
 }
 
-function load(){
-name.textContent=localStorage.user||"Guest";
-user.value=localStorage.user||"";
-if(localStorage.pic){
-avatar.src=localStorage.pic;
-prev.src=localStorage.pic;
-}
-}
+if(localStorage.pic) avatar.src=localStorage.pic;
+if(localStorage.user) username.value=localStorage.user;
 
-/* CHAT */
-function add(t,u){
-const d=document.createElement("div");
-d.className=u?"text-right text-blue-600":"text-left text-green-600";
-d.textContent=(u?"You: ":"vazAI: ")+t;
-msgs.appendChild(d);
-msgs.scrollTop=msgs.scrollHeight;
+
+/* ================= CHAT ================= */
+
+function add(text,me){
+  const d=document.createElement("div");
+
+  d.className=me?"text-right text-cyan-400":"text-green-400";
+
+  d.innerText=(me?"You: ":"vazAI: ")+text;
+
+  chat.appendChild(d);
+  chat.scrollTop=999999;
 }
 
 function send(){
-const t=input.value.trim();
-if(!t)return;
-add(t,1);
-input.value="";
-setTimeout(()=>add(ai(t),0),500);
+  const t=msg.value.trim();
+  if(!t) return;
+
+  add(t,true);
+  msg.value="";
+
+  setTimeout(()=>add(ai(t),false),600);
 }
 
-input.onkeydown=e=>{
-if(e.key==="Enter")send();
+msg.onkeydown=e=>{
+  if(e.key==="Enter") send();
 }
+
+
+/* ================= AI ================= */
 
 function ai(m){
 
-m=m.toLowerCase();
+  m=m.toLowerCase();
 
-if(m.includes("hi")) return "Hey 👋";
-if(m.includes("nhl")) return "Who’s your favorite team?";
-if(m.includes("help")) return "Tell me what you need.";
-if(/\d+[\+\-\/\*]\d+/.test(m)) return "="+eval(m);
+  if(m.includes("code"))
+    return "Tell me what you're building and I’ll help.";
 
-return "Interesting 🤔 Tell me more.";
+  if(m.includes("math"))
+    return "Send the problem and I’ll solve it.";
+
+  if(m.includes("sad"))
+    return "Talk to me. What’s going on?";
+
+  if(m.includes("who"))
+    return "Who exactly are you asking about?";
+
+  if(m.includes("how"))
+    return "Let’s break it down step by step.";
+
+  return "Interesting. Tell me more details.";
 }
 
-/* STORIES */
 
-const BASE="./";
+/* ================= STORIES ================= */
 
-const fixed=[
+let stories = JSON.parse(localStorage.stories||"[]");
 
-/* NHL */
-{u:"NHL",logo:"nhl.png",t:"McDavid scores 2 vs Flames",s:"mcdavid.png",type:"img"},
-{u:"NHL",logo:"nhl.png",t:"Leafs win OT vs Bruins",s:"leafs.gif",type:"img"},
-{u:"NHL",logo:"nhl.png",t:"Rangers clinch playoff spot",s:"rangers.gif",type:"img"},
 
-/* NBC + Stocks */
-{u:"NBC-News",logo:"nbc.png",t:"Major flooding in Miami",s:"news.gif",type:"img"},
-{u:"NBC-News",logo:"nbc.png",t:"NASDAQ surges 2.4% after Fed update",s:"stocks.jpg",type:"img"},
+/* ================= FAKE STORIES ================= */
 
-/* NFL */
-{u:"NFL",logo:"football.png",t:"Chiefs win last-second TD",s:"football.gif",type:"img"}
+const fakeStories=[
+
+{
+user:"NHL",
+logo:"nhl.png",
+media:"mcdavid.png",
+caption:"Connor McDavid scores twice vs Flames"
+},
+
+{
+user:"NHL",
+logo:"nhl.png",
+media:"leafs.gif",
+caption:"Maple Leafs win overtime vs Bruins"
+},
+
+{
+user:"NHL",
+logo:"nhl.png",
+media:"rangers.gif",
+caption:"Rangers clinch playoff spot at MSG"
+},
+
+{
+user:"NBC News",
+logo:"nbc.png",
+media:"news.gif",
+caption:"Breaking: Market reacts to Fed announcement"
+},
+
+{
+user:"NBC News",
+logo:"nbc.png",
+media:"stocks.jpg",
+caption:"Dow jumps 400 points on tech rally"
+},
+
+{
+user:"NFL",
+logo:"football.gif",
+media:"football.gif",
+caption:"Touchdown seals dramatic comeback"
+}
 
 ];
 
-let storiesData=JSON.parse(localStorage.stories||"[]");
+if(!localStorage.fakeLoaded){
 
-/* LOAD FAKE (NO DUPES) */
-function loadFake(){
+  fakeStories.forEach(s=>{
+    stories.push({
+      id:Date.now()+Math.random(),
+      ...s,
+      type:"fake"
+    });
+  });
 
-storiesData=storiesData.filter(s=>!s.fake);
-
-fixed.forEach(f=>{
-
-storiesData.push({
-id:"f_"+f.s,
-u:f.u,
-logo:f.logo,
-t:f.t,
-src:BASE+f.s,
-type:f.type,
-fake:true
-});
-
-});
-
-saveStories();
+  localStorage.fakeLoaded="yes";
+  saveStories();
 }
 
-loadFake();
 
-/* USER POST */
-function postStory(){
+/* ================= USER STORY ================= */
 
-const f=file.files[0];
-if(!f) return alert("Choose file");
+function addStory(e){
 
-const r=new FileReader();
+  const f=e.target.files[0];
+  if(!f) return;
 
-r.onload=()=>{
+  const r=new FileReader();
 
-storiesData.unshift({
-id:"u_"+Date.now(),
-u:localStorage.user||"Guest",
-logo:localStorage.pic,
-t:"My Story",
-src:r.result,
-type:f.type.startsWith("video")?"vid":"img",
-fake:false
-});
+  r.onload=()=>{
 
-saveStories();
-render();
-};
+    stories.unshift({
+      id:Date.now(),
+      user:localStorage.user||"Guest",
+      logo:localStorage.pic||"",
+      media:r.result,
+      caption:"My story",
+      type:"user"
+    });
 
-r.readAsDataURL(f);
+    saveStories();
+    renderStories();
+  };
+
+  r.readAsDataURL(f);
 }
 
-/* SAVE */
+
+/* ================= STORAGE ================= */
+
 function saveStories(){
-localStorage.stories=JSON.stringify(storiesData);
+  localStorage.stories=JSON.stringify(stories);
 }
 
-/* RENDER */
-function render(){
 
-feed.innerHTML="";
+/* ================= RENDER ================= */
 
-storiesData.forEach(s=>{
+function renderStories(){
 
-const box=document.createElement("div");
-box.className="card bg-white p-3 rounded shadow storyBox";
+  storiesPage.innerHTML="";
 
-let media="";
+  stories.forEach(s=>{
 
-if(s.type==="img"){
-media=`<img src="${s.src}" class="storyMedia">`;
-}else{
-media=`<video src="${s.src}" controls class="storyMedia"></video>`;
+    const box=document.createElement("div");
+    box.className="story";
+
+    let media="";
+
+    if(s.media.endsWith(".mp4")||s.media.includes("video")){
+      media=`<video src="${s.media}" autoplay muted loop playsinline></video>`;
+    }else{
+      media=`<img src="${s.media}">`;
+    }
+
+    box.innerHTML=`
+
+    ${media}
+
+    <div class="storyOverlay">
+
+      <div class="flex items-center gap-2 mb-1">
+
+        ${s.logo?`<img src="${s.logo}" class="logo">`:""}
+
+        <b>${s.user}</b>
+
+      </div>
+
+      <p>${s.caption}</p>
+
+    </div>
+    `;
+
+    storiesPage.appendChild(box);
+  });
 }
 
-box.innerHTML=`
 
-<div class="flex gap-2 items-center mb-1">
-<img src="${s.logo||'https://via.placeholder.com/30'}"
-class="w-7 h-7 rounded-full">
-<b>${s.u}</b>
-</div>
+/* ================= INIT ================= */
 
-${media}
+add("Hi! I'm vazAI 🤖",false);
 
-<p class="text-sm mt-1">${s.t}</p>
-
-`;
-
-feed.appendChild(box);
-
-});
-
-}
-
-/* INIT */
-function init(){
-
-if(localStorage.dark==="true")
-body.classList.add("dark");
-
-load();
-
-add("Hi! I'm vazAI 🤖",0);
-
-show("chat");
-}
-
-init();
+renderStories();
 
 </script>
+
 </body>
 </html>
