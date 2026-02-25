@@ -2,14 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>VAZapp</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <link rel="manifest" id="manifest">
-
 <meta name="theme-color" content="#2563eb">
 
 <style>
@@ -17,17 +16,11 @@
 /* GLOBAL */
 
 body{
+margin:0;
 font-family:Arial,Helvetica,sans-serif;
-transition:.3s;
-}
-
-.dark{
-background:#0f172a;
+background:#000;
 color:white;
-}
-
-.dark .card{
-background:#020617;
+overflow:hidden;
 }
 
 /* SPLASH */
@@ -39,120 +32,147 @@ background:black;
 display:flex;
 justify-content:center;
 align-items:center;
-z-index:9999;
 font-size:3rem;
 font-weight:900;
-letter-spacing:2px;
-animation:fadeout 2.5s forwards 1.8s;
+z-index:9999;
+animation:fadeout 2.5s forwards 1.5s;
 }
 
-#splash span{
-color:#22d3ee;
-}
+#splash span{color:#22d3ee}
 
 @keyframes fadeout{
-to{opacity:0;visibility:hidden;}
+to{opacity:0;visibility:hidden}
+}
+
+/* HEADER */
+
+header{
+background:#111;
+padding:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+/* NAV */
+
+.navbtn{
+background:#2563eb;
+padding:6px 12px;
+border-radius:6px;
+font-size:14px;
+}
+
+/* PAGES */
+
+.page{
+display:none;
+height:calc(100vh - 60px);
+overflow:hidden;
+}
+
+.active{
+display:block;
 }
 
 /* STORIES */
 
+#storiesFeed{
+height:100%;
+overflow-y:scroll;
+scroll-snap-type:y mandatory;
+}
+
 .story{
-max-width:420px;
-margin:auto;
+height:100%;
+scroll-snap-align:start;
+position:relative;
+display:flex;
+align-items:center;
+justify-content:center;
 }
 
 .story img,
 .story video{
-width:100%;
-border-radius:12px;
+max-height:100%;
+max-width:100%;
+object-fit:contain;
 }
 
-/* LOGO */
+/* SIDE BAR */
 
-.logo{
-width:28px;
-height:28px;
-margin-right:8px;
+.sideBar{
+position:absolute;
+right:12px;
+bottom:120px;
+display:flex;
+flex-direction:column;
+gap:18px;
+font-size:22px;
 }
 
-/* CARD */
+.sideBar button{
+background:rgba(0,0,0,.5);
+padding:10px;
+border-radius:50%;
+}
+
+/* PROFILE */
 
 .card{
-background:white;
-border-radius:12px;
-padding:12px;
-box-shadow:0 2px 6px rgba(0,0,0,.1);
+background:#111;
+padding:15px;
+border-radius:10px;
+}
+
+input{
+color:black;
+}
+
+/* CHAT */
+
+#chat{
+height:80%;
+overflow-y:auto;
+border:1px solid #333;
+padding:6px;
 }
 
 </style>
 </head>
 
-<body id="body" class="bg-gray-100 min-h-screen flex flex-col">
+<body>
 
 <!-- SPLASH -->
-
 <div id="splash">
 VAZ<span>app</span>
 </div>
 
 <!-- HEADER -->
+<header>
 
-<header class="bg-blue-600 text-white p-3 flex justify-between items-center">
-
-<h1 class="font-bold text-xl">VAZapp</h1>
+<b>VAZapp</b>
 
 <div class="space-x-2">
 
-<button onclick="showChat()" class="bg-blue-500 px-3 py-1 rounded">
-Chat
-</button>
-
-<button onclick="showStories()" class="bg-blue-500 px-3 py-1 rounded">
-Stories
-</button>
-
-<button onclick="showProfile()" class="bg-blue-500 px-3 py-1 rounded">
-Profile
-</button>
-
-<button onclick="toggleDark()" class="bg-gray-800 px-3 py-1 rounded">
-🌙
-</button>
+<button onclick="show('chat')" class="navbtn">Chat</button>
+<button onclick="show('stories')" class="navbtn">Stories</button>
+<button onclick="show('profile')" class="navbtn">Profile</button>
 
 </div>
 
 </header>
 
-<!-- MAIN -->
-
-<main class="flex-1 p-4 flex justify-center">
-
 <!-- CHAT -->
+<div id="chatPage" class="page active p-3">
 
-<div id="chatPage" class="card w-full max-w-xl flex flex-col">
+<div id="chat"></div>
 
-<div class="flex items-center mb-2">
+<div class="flex gap-2 mt-2">
 
-<img id="chatAvatar"
-class="w-8 h-8 rounded-full mr-2"
-src="https://via.placeholder.com/40">
+<input id="msg" class="flex-1 p-2 rounded">
 
-<b id="chatName">Guest</b>
-
-</div>
-
-<div id="chat"
-class="flex-1 border rounded p-2 mb-2 overflow-y-auto">
-</div>
-
-<div class="flex gap-2">
-
-<input id="userInput"
-class="flex-1 border rounded p-2"
-placeholder="Type here...">
-
-<button onclick="sendMessage()"
-class="bg-blue-600 text-white px-4 rounded">
+<button onclick="send()" class="navbtn">
 Send
 </button>
 
@@ -161,300 +181,212 @@ Send
 </div>
 
 <!-- STORIES -->
-
-<div id="storiesPage"
-class="hidden w-full max-w-2xl">
-
-<div class="card mb-3">
-
-<input type="file"
-accept="image/*,video/*"
-onchange="uploadStory(event)">
-
-</div>
+<div id="storiesPage" class="page">
 
 <div id="storiesFeed"></div>
 
 </div>
 
 <!-- PROFILE -->
+<div id="profilePage" class="page p-4">
 
-<div id="profilePage"
-class="hidden card w-full max-w-md">
+<div class="card">
 
-<h2 class="text-xl font-bold mb-3">
-Profile
-</h2>
+<h2 class="text-xl mb-2">Profile</h2>
 
-<img id="profilePic"
-class="w-24 h-24 rounded-full mx-auto mb-3"
-src="https://via.placeholder.com/120">
+<img id="pic" class="w-24 h-24 rounded-full mb-3"
+src="https://via.placeholder.com/100">
 
-<input type="file"
-accept="image/*"
-onchange="loadPic(event)"
-class="mb-3">
+<input type="file" onchange="loadPic(event)">
 
-<input id="usernameInput"
-class="border w-full p-2 mb-3"
+<input id="name"
+class="w-full p-2 my-2"
 placeholder="Username">
 
 <button onclick="saveProfile()"
-class="bg-blue-600 text-white w-full p-2 rounded">
-
+class="navbtn w-full">
 Save
-
 </button>
 
 </div>
 
-</main>
+<hr class="my-4">
 
-<footer class="bg-gray-200 text-center p-2 text-sm">
-© 2026 VAZapp
-</footer>
+<div class="card">
+
+<h3>Upload Story</h3>
+
+<input type="file"
+accept="image/*,video/*"
+onchange="upload(event)">
+
+</div>
+
+</div>
 
 <!-- SCRIPT -->
-
 <script>
 
 /* NAV */
 
-const chatPage = document.getElementById("chatPage");
-const storiesPage = document.getElementById("storiesPage");
-const profilePage = document.getElementById("profilePage");
+const pages={
+chat:chatPage,
+stories:storiesPage,
+profile:profilePage
+};
 
-function showChat(){
-chatPage.classList.remove("hidden");
-storiesPage.classList.add("hidden");
-profilePage.classList.add("hidden");
-}
+function show(p){
 
-function showStories(){
-storiesPage.classList.remove("hidden");
-chatPage.classList.add("hidden");
-profilePage.classList.add("hidden");
-renderStories();
-}
+Object.values(pages)
+.forEach(x=>x.classList.remove("active"));
 
-function showProfile(){
-profilePage.classList.remove("hidden");
-chatPage.classList.add("hidden");
-storiesPage.classList.add("hidden");
-}
+pages[p].classList.add("active");
 
-/* DARK MODE */
-
-function toggleDark(){
-
-body.classList.toggle("dark");
-
-localStorage.dark =
-body.classList.contains("dark");
+if(p==="stories") render();
 
 }
 
 /* PROFILE */
 
+function saveProfile(){
+
+localStorage.user=name.value||"Guest";
+localStorage.pic=pic.src;
+
+}
+
 function loadPic(e){
 
-const r = new FileReader();
+const r=new FileReader();
 
-r.onload = ()=>{
-profilePic.src = r.result;
-};
+r.onload=()=>pic.src=r.result;
 
 r.readAsDataURL(e.target.files[0]);
 
 }
 
-function saveProfile(){
-
-localStorage.user =
-usernameInput.value || "Guest";
-
-localStorage.pic =
-profilePic.src;
-
-loadProfile();
-showChat();
-
-}
-
-function loadProfile(){
-
-chatName.textContent =
-localStorage.user || "Guest";
-
-usernameInput.value =
-localStorage.user || "";
-
-if(localStorage.pic){
-
-profilePic.src = localStorage.pic;
-chatAvatar.src = localStorage.pic;
-
-}
-
-}
-
 /* CHAT */
 
-function addMsg(t,s){
+function add(t,s){
 
-const d = document.createElement("div");
+const d=document.createElement("div");
 
-d.className =
-s==="u" ?
-"text-right text-blue-600" :
-"text-left text-green-600";
-
-d.textContent =
-(s==="u"?"You: ":"vazAI: ")+t;
+d.textContent=(s?"You: ":"vazAI: ")+t;
 
 chat.appendChild(d);
 
-chat.scrollTop = chat.scrollHeight;
+chat.scrollTop=chat.scrollHeight;
 
 }
 
-function sendMessage(){
+function send(){
 
-const t = userInput.value.trim();
+const t=msg.value.trim();
 
 if(!t) return;
 
-addMsg(t,"u");
+add(t,1);
 
-userInput.value="";
+msg.value="";
 
 setTimeout(()=>{
-addMsg(ai(t),"a");
-},500);
+add(ai(t),0);
+},600);
 
 }
-
-userInput.onkeydown = e=>{
-if(e.key==="Enter") sendMessage();
-};
 
 function ai(m){
 
 m=m.toLowerCase();
 
-if(m.includes("hello")) return "Hey 👋";
+if(m.includes("hi")) return "Hey 👋";
+if(m.includes("help")) return "How can I help?";
+if(m.includes("code")) return "Tell me about it.";
+if(m.includes("sad")) return "I'm here 💙";
 
-if(m.includes("help")) return "What do you need?";
-
-if(m.includes("code")) return "Tell me your project.";
-
-if(m.includes("sad")) return "I got you 💙";
-
-if(/\d+[+\-*\/]\d+/.test(m))
-return "Answer: "+eval(m);
-
-return "Tell me more 🙂";
+return "Interesting. Tell me more.";
 
 }
 
-/* STORIES */
+/* STORIES DATA */
 
-let stories = [];
+let stories=[];
 
-const fakeStories = [
+const fake=[
 
 {
 user:"NHL",
-logo:"https://upload.wikimedia.org/wikipedia/en/3/3a/NHL_Logo.svg",
-type:"gif",
 src:"https://media.giphy.com/media/l0MYt5jPR6QX5pnqM/giphy.gif",
-text:"Connor McDavid scores twice vs Flames"
+type:"gif",
+text:"McDavid scores twice vs Flames"
 },
 
 {
 user:"NHL",
-logo:"https://upload.wikimedia.org/wikipedia/en/3/3a/NHL_Logo.svg",
-type:"gif",
 src:"https://media.giphy.com/media/3o6Zt481isNVuQI1l6/giphy.gif",
-text:"Maple Leafs OT winner vs Bruins"
+type:"gif",
+text:"Leafs win in overtime"
 },
 
 {
 user:"NBC News",
-logo:"https://upload.wikimedia.org/wikipedia/commons/7/79/NBC_News_2013.svg",
-type:"image",
 src:"https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3",
-text:"Stocks rally after Fed announcement"
+type:"img",
+text:"Stock market surges"
 },
 
 {
 user:"NFL",
-logo:"https://upload.wikimedia.org/wikipedia/en/a/a2/National_Football_League_logo.svg",
-type:"image",
 src:"https://images.unsplash.com/photo-1508098682722-e99c43a406b2",
-text:"Chiefs dominate AFC Championship"
+type:"img",
+text:"Chiefs dominate playoffs"
 }
 
 ];
 
-function loadStories(){
+/* LOAD */
 
-const saved =
-localStorage.getItem("vaz_stories");
+function load(){
 
-if(saved){
+const s=localStorage.stories;
 
-stories = JSON.parse(saved);
-
-}
+if(s) stories=JSON.parse(s);
 else{
-
-stories = [...fakeStories];
-
-saveStories();
-
+stories=[...fake];
+save();
 }
 
 }
 
-function saveStories(){
-
-localStorage.setItem(
-"vaz_stories",
-JSON.stringify(stories)
-);
-
+function save(){
+localStorage.stories=JSON.stringify(stories);
 }
 
-function uploadStory(e){
+/* UPLOAD */
 
-const f = e.target.files[0];
+function upload(e){
+
+const f=e.target.files[0];
 
 if(!f) return;
 
-const cap =
-prompt("Caption?") || "My story";
+const cap=prompt("Caption?")||"My story";
 
-const type =
-f.type.startsWith("image") ?
-"image":"video";
+const r=new FileReader();
 
-const r = new FileReader();
-
-r.onload = ()=>{
+r.onload=()=>{
 
 stories.unshift({
 
-user: localStorage.user || "Guest",
-logo:"",
-type:type,
+user:localStorage.user||"Guest",
 src:r.result,
+type:f.type.startsWith("video")?"vid":"img",
 text:cap
 
 });
 
-saveStories();
-renderStories();
+save();
+render();
 
 };
 
@@ -462,79 +394,74 @@ r.readAsDataURL(f);
 
 }
 
-function deleteStory(i){
+/* DELETE */
+
+function del(i){
 
 if(!confirm("Delete?")) return;
 
 stories.splice(i,1);
 
-saveStories();
-renderStories();
+save();
+render();
 
 }
 
-function renderStories(){
+/* RENDER */
+
+function render(){
 
 storiesFeed.innerHTML="";
 
 stories.forEach((s,i)=>{
 
-if(!s.src) return;
+const d=document.createElement("div");
 
-const box =
-document.createElement("div");
-
-box.className="story card mb-4";
+d.className="story";
 
 let media="";
 
-if(s.type==="image"||s.type==="gif"){
+if(s.type==="vid"){
 
-media =
-`<img src="${s.src}">`;
+media=`<video src="${s.src}" autoplay loop muted></video>`;
 
 }
 else{
 
-media =
-`<video src="${s.src}" controls></video>`;
+media=`<img src="${s.src}">`;
 
 }
 
-const del =
-s.user ===
-(localStorage.user||"Guest")
-? `<button onclick="deleteStory(${i})"
-class="text-red-500">🗑️</button>`
+const delBtn=
+s.user===(localStorage.user||"Guest")
+?`<button onclick="del(${i})">🗑️</button>`
 :"";
 
-box.innerHTML = `
-
-<div class="flex justify-between items-center mb-2">
-
-<div class="flex items-center">
-
-${s.logo?
-`<img src="${s.logo}" class="logo">`
-:""}
-
-<b>${s.user}</b>
-
-</div>
-
-${del}
-
-</div>
+d.innerHTML=`
 
 ${media}
 
-<p class="mt-2 text-sm">
-${s.text}
-</p>
+<div class="absolute bottom-10 left-4">
+
+<b>${s.user}</b>
+
+<p>${s.text}</p>
+
+</div>
+
+<div class="sideBar">
+
+<button>❤️</button>
+<button>💬</button>
+<button>↗️</button>
+
+${delBtn}
+
+</div>
 
 `;
 
-storiesFeed.appendChild(box);
+storiesFeed.appendChild(d);
 
 });
 
@@ -544,13 +471,9 @@ storiesFeed.appendChild(box);
 
 function init(){
 
-if(localStorage.dark==="true")
-body.classList.add("dark");
+load();
 
-loadProfile();
-loadStories();
-
-addMsg("Hi! I'm vazAI 🤖","a");
+add("Hi! I'm vazAI 🤖",0);
 
 }
 
@@ -558,7 +481,7 @@ init();
 
 /* PWA */
 
-const manifest = {
+const manifest={
 name:"VAZapp",
 short_name:"VAZapp",
 start_url:".",
@@ -567,33 +490,36 @@ background_color:"#000",
 theme_color:"#2563eb"
 };
 
-const blob =
-new Blob([JSON.stringify(manifest)],
-{type:"application/json"});
+const blob=new Blob(
+[JSON.stringify(manifest)],
+{type:"application/json"}
+);
 
-document.getElementById("manifest").href =
+manifest.href=
 URL.createObjectURL(blob);
 
 if("serviceWorker" in navigator){
 
-const sw = `
+const sw=`
+
 self.addEventListener("install",e=>{
-caches.open("vaz")
-.then(c=>c.addAll(["./"]));
+caches.open("vaz").then(c=>c.addAll(["./"]));
 });
+
 self.addEventListener("fetch",e=>{
 e.respondWith(
 caches.match(e.request)
 .then(r=>r||fetch(e.request))
 );
 });
+
 `;
 
-const b =
-new Blob([sw],{type:"text/javascript"});
-
-navigator.serviceWorker
-.register(URL.createObjectURL(b));
+navigator.serviceWorker.register(
+URL.createObjectURL(
+new Blob([sw],{type:"text/javascript"})
+)
+);
 
 }
 
